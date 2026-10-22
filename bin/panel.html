@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AutoQA Agent Panel</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #151b23;
+    --panel-2: #1b222c;
+    --line: #2a323d;
+    --text: #e6edf3;
+    --muted: #8b96a3;
+    --accent: #58a6ff;
+    --ok: #3fb950;
+    --bad: #f85149;
+    --warn: #d29922;
+    --c-browser: #58a6ff;
+    --c-read: #8b96a3;
+    --c-write: #d2a8ff;
+    --c-test: #3fb950;
+    --c-skill: #e3b341;
+    --c-shell: #79c0ff;
+    --c-plan: #8b96a3;
+    --mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif;
+    display: flex; flex-direction: column;
+  }
+
+  header {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    padding: 14px 20px; border-bottom: 1px solid var(--line); background: var(--panel);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 17px; }
+  .mark {
+    width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center;
+    background: linear-gradient(135deg, #58a6ff, #3fb950); color: #0d1117; font-size: 13px; font-weight: 800;
+  }
+  .pill {
+    display: inline-flex; align-items: center; gap: 7px; padding: 3px 11px; border-radius: 999px;
+    font-size: 13px; font-weight: 600; border: 1px solid var(--line); color: var(--muted);
+  }
+  .pill .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .pill.live { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+  .pill.live .dot { animation: pulse 1.2s ease-in-out infinite; }
+  .pill.done { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+  .pill.failed { color: var(--bad); }
+  @keyframes pulse { 50% { opacity: .25; } }
+  .meta { color: var(--muted); font-size: 13px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .meta b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .spacer { flex: 1; }
+  select {
+    background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+    border-radius: 6px; padding: 5px 8px; font: inherit; font-size: 13px;
+  }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .stat { background: var(--panel); padding: 10px 20px; }
+  .stat .k { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .stat .v { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stat .v small { font-size: 14px; font-weight: 600; margin-left: 6px; }
+
+  main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 340px; }
+  #feed { overflow-y: auto; padding: 18px 20px 60px; scroll-behavior: smooth; }
+  aside { border-left: 1px solid var(--line); overflow-y: auto; padding: 18px; background: var(--panel); }
+
+  .group { margin-bottom: 18px; animation: in .25s ease-out; }
+  @keyframes in { from { opacity: 0; transform: translateY(4px); } }
+  .say {
+    font-size: 16.5px; line-height: 1.5; padding: 2px 0 8px 14px;
+    border-left: 3px solid var(--accent); white-space: pre-wrap;
+  }
+  .say strong { color: #fff; }
+  .say code, .step code { font-family: var(--mono); font-size: .88em; background: var(--panel-2); padding: 1px 5px; border-radius: 4px; }
+  .steps { margin: 4px 0 0 17px; display: flex; flex-direction: column; gap: 3px; }
+  .step {
+    display: grid; grid-template-columns: 22px minmax(0, 1fr) 20px; align-items: start; gap: 10px;
+    padding: 5px 10px; border-radius: 6px; background: var(--panel); font-size: 14px;
+    animation: in .2s ease-out;
+  }
+  .ico {
+    width: 22px; height: 22px; border-radius: 5px; display: grid; place-items: center;
+    font-size: 11px; font-weight: 700; color: #0d1117; margin-top: 1px;
+  }
+  .label { overflow-wrap: anywhere; }
+  .cat { color: var(--muted); font-size: 12px; margin-right: 6px; }
+  .status { text-align: center; margin-top: 2px; }
+  .spin {
+    display: inline-block; width: 13px; height: 13px; border-radius: 50%;
+    border: 2px solid var(--line); border-top-color: var(--accent); animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .okm { color: var(--ok); } .badm { color: var(--bad); }
+  .note { grid-column: 2 / 4; color: var(--bad); font-size: 13px; }
+  .tests { grid-column: 2 / 4; display: flex; gap: 8px; }
+  .chip { font-size: 12.5px; font-weight: 700; padding: 1px 9px; border-radius: 999px; }
+  .chip.p { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+  .chip.f { background: color-mix(in srgb, var(--bad) 18%, transparent); color: var(--bad); }
+  .diff { grid-column: 2 / 4; font-family: var(--mono); font-size: 12.5px; border-radius: 5px; overflow: hidden; }
+  .diff div { padding: 3px 8px; overflow-wrap: anywhere; }
+  .diff .m { background: rgba(248, 81, 73, .13); color: #ffa198; }
+  .diff .a { background: rgba(63, 185, 80, .13); color: #7ee787; }
+  .thinking { color: var(--muted); font-style: italic; margin-left: 17px; display: none; }
+  .thinking.on { display: block; }
+
+  .result {
+    margin-top: 10px; padding: 14px 16px; border-radius: 8px; font-weight: 600;
+    background: color-mix(in srgb, var(--ok) 12%, var(--panel)); border: 1px solid color-mix(in srgb, var(--ok) 35%, transparent);
+  }
+  .result.bad { background: color-mix(in srgb, var(--bad) 12%, var(--panel)); border-color: color-mix(in srgb, var(--bad) 35%, transparent); }
+
+  aside h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 8px; }
+  aside section { margin-bottom: 24px; }
+  .big { display: flex; gap: 18px; }
+  .big div { font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .big span { display: block; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+  .list li {
+    font-size: 13px; padding: 6px 9px; border-radius: 6px; background: var(--panel-2);
+    font-family: var(--mono); overflow-wrap: anywhere; animation: in .2s ease-out;
+  }
+  .list.bugs li { font-family: inherit; border-left: 3px solid var(--bad); }
+  .empty { color: var(--muted); font-size: 13px; }
+  .waiting { color: var(--muted); padding: 40px 0; text-align: center; font-size: 16px; }
+
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+    aside { border-left: 0; border-top: 1px solid var(--line); }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    header { padding: 12px 16px; }
+    #feed { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="mark">QA</div>AutoQA Agent</div>
+  <span id="state" class="pill"><span class="dot"></span><span id="stateText">Connecting</span></span>
+  <div class="meta">
+    <span>Task <b id="task">-</b></span>
+    <span>Elapsed <b id="elapsed">0:00</b></span>
+    <span>Model <b id="model">-</b></span>
+  </div>
+  <div class="spacer"></div>
+  <select id="picker" aria-label="Run"><option value="">Follow live</option></select>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="k">Browser actions</div><div class="v" id="sBrowser">0</div></div>
+  <div class="stat"><div class="k">Files changed</div><div class="v" id="sFiles">0</div></div>
+  <div class="stat"><div class="k">Test runs</div><div class="v" id="sTests">0</div></div>
+  <div class="stat"><div class="k">Bug reports</div><div class="v" id="sBugs">0</div></div>
+</div>
+
+<main>
+  <div id="feed"><div class="waiting" id="waiting">Waiting for the agent to start…</div></div>
+  <aside>
+    <section>
+      <h2>Latest test run</h2>
+      <div id="latest" class="empty">No test run yet</div>
+    </section>
+    <section>
+      <h2>Bug reports</h2>
+      <ul class="list bugs" id="bugs"><li class="empty" style="background:none;border:0;padding:0">None yet</li></ul>
+    </section>
+    <section>
+      <h2>Files changed</h2>
+      <ul class="list" id="files"><li class="empty" style="background:none;padding:0">None yet</li></ul>
+    </section>
+  </aside>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const pickedRun = params.get('run') || '';
+
+const CATS = {
+  browser: ['Browser', 'B'], read: ['Read', 'R'], write: ['Code', 'W'], test: ['Tests', 'T'],
+  skill: ['Skill', 'S'], shell: ['Shell', '$'], plan: ['Plan', 'P'],
+};
+
+let state, timer;
+function reset() {
+  state = { group: null, steps: new Map(), browser: 0, files: new Set(), bugs: new Set(), tests: 0, start: null, end: null };
+  $('feed').innerHTML = '<div class="waiting" id="waiting">Waiting for the agent to start…</div><div class="thinking" id="thinking">Thinking…</div>';
+  for (const id of ['sBrowser', 'sFiles', 'sTests', 'sBugs']) $(id).textContent = '0';
+  $('latest').className = 'empty'; $('latest').textContent = 'No test run yet';
+  $('bugs').innerHTML = '<li class="empty" style="background:none;border:0;padding:0">None yet</li>';
+  $('files').innerHTML = '<li class="empty" style="background:none;padding:0">None yet</li>';
+  $('elapsed').textContent = '0:00';
+}
+
+function setState(kind, text) {
+  $('state').className = 'pill ' + kind;
+  $('stateText').textContent = text;
+}
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// Light markdown for the agent's narration: `code` and **bold**.
+const md = (s) => esc(s).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+let stick = true;
+$('feed').addEventListener('scroll', () => {
+  const f = $('feed');
+  stick = f.scrollHeight - f.scrollTop - f.clientHeight < 80;
+});
+function append(node) {
+  const f = $('feed');
+  f.insertBefore(node, $('thinking'));
+  if (stick) f.scrollTop = f.scrollHeight;
+}
+
+function newGroup(text) {
+  const g = document.createElement('div');
+  g.className = 'group';
+  if (text) {
+    const s = document.createElement('div');
+    s.className = 'say';
+    s.innerHTML = md(text);
+    g.appendChild(s);
+  }
+  const steps = document.createElement('div');
+  steps.className = 'steps';
+  g.appendChild(steps);
+  append(g);
+  state.group = steps;
+}
+
+const fmt = (secs) => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+function tick() {
+  if (!state.start) return;
+  const end = state.end ?? Date.now();
+  $('elapsed').textContent = fmt(Math.max(0, Math.round((end - state.start) / 1000)));
+}
+
+function listAdd(listId, text) {
+  const ul = $(listId);
+  if (ul.querySelector('.empty')) ul.innerHTML = '';
+  const li = document.createElement('li');
+  li.textContent = text;
+  ul.appendChild(li);
+}
+
+function bugTitle(file) {
+  const name = file.split(/[\\/]/).pop().replace(/\.md$/, '');
+  const m = name.match(/^(BUG-\d+)-?(.*)$/i);
+  return m ? `${m[1].toUpperCase()}  ${m[2].replace(/-/g, ' ')}` : name;
+}
+
+function onStep(ev) {
+  if (!state.group) newGroup('');
+  $('waiting')?.remove();
+  const [catName, glyph] = CATS[ev.cat] ?? ['Step', '·'];
+  const row = document.createElement('div');
+  row.className = 'step';
+  row.innerHTML = `
+    <div class="ico" style="background:var(--c-${ev.cat})">${glyph}</div>
+    <div class="label"><span class="cat">${catName}</span>${esc(ev.label)}</div>
+    <div class="status"><span class="spin"></span></div>`;
+  if (ev.diff) {
+    const d = document.createElement('div');
+    d.className = 'diff';
+    d.innerHTML = `<div class="m">- ${esc(ev.diff.before)}</div><div class="a">+ ${esc(ev.diff.after)}</div>`;
+    row.appendChild(d);
+  }
+  state.group.appendChild(row);
+  state.steps.set(ev.id, { row, ev });
+  if (stick) $('feed').scrollTop = $('feed').scrollHeight;
+
+  if (ev.cat === 'browser') $('sBrowser').textContent = ++state.browser;
+  if (ev.file) {
+    const isBug = /[\\/]bugs[\\/][^\\/]+\.md$/i.test(ev.file);
+    if (isBug && !state.bugs.has(ev.file)) {
+      state.bugs.add(ev.file);
+      listAdd('bugs', bugTitle(ev.file));
+      $('sBugs').textContent = state.bugs.size;
+    }
+    if (!state.files.has(ev.file)) {
+      state.files.add(ev.file);
+      listAdd('files', ev.file);
+      $('sFiles').textContent = state.files.size;
+    }
+  }
+}
+
+function onDone(ev) {
+  const s = state.steps.get(ev.id);
+  if (!s) return;
+  s.row.querySelector('.status').innerHTML = ev.ok ? '<span class="okm">✓</span>' : '<span class="badm">✗</span>';
+  if (ev.note) {
+    const n = document.createElement('div');
+    n.className = 'note';
+    n.textContent = ev.note;
+    s.row.appendChild(n);
+  }
+  if (s.ev.cat === 'test') {
+    $('sTests').textContent = ++state.tests;
+    if (ev.tests) {
+      const t = ev.tests;
+      const chips = document.createElement('div');
+      chips.className = 'tests';
+      chips.innerHTML = `<span class="chip p">${t.passed} passed</span>` + (t.failed ? `<span class="chip f">${t.failed} failed</span>` : '');
+      s.row.appendChild(chips);
+      $('latest').className = '';
+      $('latest').innerHTML = `<div class="big">
+        <div style="color:var(--ok)">${t.passed}<span>passed</span></div>
+        <div style="color:${t.failed ? 'var(--bad)' : 'var(--muted)'}">${t.failed}<span>failed</span></div>
+      </div>`;
+    }
+  }
+}
+
+function handle(ev) {
+  $('thinking').classList.toggle('on', ev.kind === 'think');
+  switch (ev.kind) {
+    case 'waiting':
+      setState('', 'Waiting for a run');
+      break;
+    case 'run':
+      reset();
+      $('task').textContent = ev.command === 'heal' ? 'Self-heal' : ev.command === 'generate' ? 'Explore and generate' : ev.command;
+      setState('live', pickedRun ? 'Replay' : 'Live');
+      break;
+    case 'init':
+      $('model').textContent = ev.model ?? '-';
+      state.start = Date.now();
+      break;
+    case 'say':
+      $('waiting')?.remove();
+      newGroup(ev.text);
+      break;
+    case 'step': onStep(ev); break;
+    case 'done': onDone(ev); break;
+    case 'result': {
+      state.end = Date.now();
+      if (pickedRun && ev.secs) $('elapsed').textContent = fmt(ev.secs);
+      else tick();
+      setState(ev.ok ? 'done' : 'failed', ev.ok ? 'Finished' : 'Stopped');
+      const r = document.createElement('div');
+      r.className = 'result' + (ev.ok ? '' : ' bad');
+      r.textContent = `${ev.ok ? 'Run finished' : 'Run stopped'} in ${fmt(ev.secs)} · ${ev.turns} turns · ${state.bugs.size} bug report${state.bugs.size === 1 ? '' : 's'}`;
+      append(r);
+      break;
+    }
+    case 'error':
+      setState('failed', 'Error: ' + ev.text);
+      break;
+  }
+}
+
+async function loadRuns() {
+  const runs = await fetch('/runs').then((r) => r.json()).catch(() => []);
+  const sel = $('picker');
+  for (const id of runs.slice().reverse()) {
+    const o = document.createElement('option');
+    o.value = id;
+    o.textContent = 'Replay ' + id;
+    if (id === pickedRun) o.selected = true;
+    sel.appendChild(o);
+  }
+  sel.onchange = () => { location.search = sel.value ? '?run=' + encodeURIComponent(sel.value) : ''; };
+}
+
+reset();
+loadRuns();
+setInterval(tick, 500);
+const src = new EventSource('/stream' + (pickedRun ? '?run=' + encodeURIComponent(pickedRun) + (params.get('delay') ? '&delay=' + params.get('delay') : '') : ''));
+src.onmessage = (m) => handle(JSON.parse(m.data));
+src.onerror = () => { if (!state.end) setState('', 'Reconnecting'); };
+</script>
+</body>
+</html>

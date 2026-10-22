@@ -1,0 +1,2 @@
+# Shell hooks must keep Unix line endings on every platform.
+hooks/* text eol=lf

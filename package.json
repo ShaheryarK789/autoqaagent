@@ -1,0 +1,29 @@
+{
+  "name": "autoqaagent",
+  "version": "0.1.0",
+  "description": "An AI testing agent: Claude Code explores a web app, writes Playwright tests and reports bugs.",
+  "scripts": {
+    "setup": "node bin/setup.mjs",
+    "generate": "node bin/autoqa.mjs generate",
+    "generate:demo": "node bin/autoqa.mjs generate --headed --panel",
+    "heal": "node bin/autoqa.mjs heal",
+    "heal:demo": "node bin/autoqa.mjs heal --headed --panel",
+    "check-login": "node bin/autoqa.mjs check-login --headed",
+    "panel": "node bin/panel.mjs",
+    "test": "node bin/autoqa.mjs test",
+    "test:ui": "playwright test --ui",
+    "report": "npx playwright show-report",
+    "report:html": "node bin/report-html.mjs --open"
+  },
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "@playwright/mcp": "^0.0.83",
+    "@playwright/test": "^1.63.0",
+    "marked": "^18.1.0"
+  },
+  "private": true,
+  "bin": {
+    "autoqa": "bin/autoqa.mjs"
+  }
+}

@@ -1,0 +1,24 @@
+#!/bin/sh
+# Keeps site test work out of the agent repo (the "origin" remote):
+#  - site/* branches belong on the private "sites" remote;
+#  - no branch pushed to origin may contain generated tests or run reports.
+# Installed into .git/hooks by `npm run setup`.
+[ "$1" = "origin" ] || exit 0
+zero=0000000000000000000000000000000000000000
+while read local_ref local_sha remote_ref remote_sha; do
+  # Deleting a branch from the agent repo is always allowed.
+  [ "$local_sha" = "$zero" ] && continue
+  case "$remote_ref" in
+    refs/heads/site/*)
+      echo "Blocked: '$remote_ref' is site test work. Push it to the private repo: git push sites ${remote_ref#refs/heads/}" >&2
+      exit 1
+      ;;
+  esac
+  found=$(git ls-tree -r --name-only "$local_sha" -- generated-tests runs | grep -v '/\.gitkeep$' | head -3)
+  if [ -n "$found" ]; then
+    echo "Blocked: '$remote_ref' contains site test work, which must not go to the agent repo:" >&2
+    echo "$found" >&2
+    exit 1
+  fi
+done
+exit 0

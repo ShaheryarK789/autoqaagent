@@ -1,0 +1,151 @@
+# AutoQA Agent
+
+An AI testing agent built on Claude Code and Playwright. Give it the address of your web app and it works like a QA engineer who has just joined your team:
+
+1. **Explores** the app in a real browser and maps its user journeys.
+2. **Plans** what to test, rated by risk.
+3. **Writes** a Playwright test suite, in a consistent house style.
+4. **Runs** it, fixes its own test mistakes and reports the real bugs.
+5. **Repairs** the tests when your UI changes, without hiding real bugs.
+
+What you keep at the end is an ordinary Playwright suite that you own. Re-running it needs no AI and takes seconds.
+
+## Use it in four steps
+
+You need [Node.js 22](https://nodejs.org), [Git](https://git-scm.com) and [Claude Code](https://code.claude.com) (`npm install -g @anthropic-ai/claude-code`, then run `claude` once to log in). The agent runs on a Claude subscription, so there is no API key to buy.
+
+**1. Get the agent**
+
+```bash
+git clone https://github.com/shaheryark789/autoqaagent.git
+cd autoqaagent
+npm install
+npx playwright install chromium
+```
+
+**2. Tell it where your app is**
+
+Create a file named `.env` in the folder:
+
+```
+TARGET_URL=https://staging.your-app.com
+```
+
+If the app has a login, add a test account. The agent never sees the password (see [Credentials](#credentials)):
+
+```
+TEST_USERNAME=qa@your-company.com
+TEST_PASSWORD='the password'
+```
+
+**3. Run it**
+
+```bash
+npm run generate:demo
+```
+
+A browser window opens so you can watch the agent work, next to a live panel that narrates every step. A first run takes roughly 15 to 25 minutes.
+
+**4. Read the results**
+
+- `runs/<run-id>/report.html`: the whole run in one page you can open, print to PDF or send to someone. It has the summary, every bug report with its screenshot, the test plan and the journey map.
+- `runs/<run-id>/report.md`: the same report as Markdown, for reading in the repo or in a pull request.
+- `runs/<run-id>/bugs/`: one report per real bug, with steps to reproduce.
+- `generated-tests/`: the Playwright suite. Run it again any time with `npm test`.
+
+That is the whole loop. When your app changes later, one more command repairs the suite:
+
+```bash
+npm run heal:demo
+```
+
+## What you get
+
+| Output | What it is |
+| --- | --- |
+| Journey map | The app's routes and user journeys as the agent found them, with the exact element names tests will use |
+| Test plan | Test cases rated by risk, including what it decided not to test and why |
+| Playwright suite | Page objects and specs: role-based locators, no hard waits, no CSS selectors |
+| Bug reports | One per real defect: severity, steps to reproduce, expected and actual result, evidence |
+| Run report | Suite summary with a flaky count from repeated runs, the meaning of every failure, the bug list. Written as Markdown and as one self-contained HTML page |
+| Replayable log | Every step the agent took, viewable in the live panel afterwards |
+
+## How it works
+
+The agent is [Claude Code](https://code.claude.com) running without a chat window, driving a real browser through [Playwright MCP](https://github.com/microsoft/playwright-mcp). Its QA judgment is written down as skills.
+
+| Piece | Where | Role |
+| --- | --- | --- |
+| Runner | `bin/autoqa.mjs` | Starts the agent, locks its browser to your app's address and records every step |
+| Rules | `CLAUDE.md` | Stay on the target, use test data only, never weaken a test to hide a bug, narrate each step |
+| Skills | `.claude/skills/` | How to explore an app, design tests by risk, write Playwright in the house style, and tell a broken test from a real bug |
+| Live panel | `bin/panel.mjs` | A local page showing each step as it happens, or replaying a past run |
+
+**The skills are the product.** They hold the method: what to test first, which locators survive a redesign, what counts as a bug. Tailoring them to a team's own standards changes how the agent works without touching the code.
+
+## Self-healing
+
+UI changes are the main reason test suites rot. `npm run heal` re-runs the suite against the changed app, reproduces each failure in the browser and sorts it into one of two kinds:
+
+- **The test broke** (a renamed button, a moved field, changed test data): it repairs the test, in the page object where the locator lives.
+- **The app broke** (a real defect): it leaves the test failing, unchanged, and writes a bug report.
+
+The second half matters as much as the first. A tool that makes every red test green hides the bugs the suite exists to catch.
+
+## Credentials
+
+For apps with a login, the agent signs in with a test account without being given its password:
+
+- **The agent only knows the names.** It types the text `TEST_USERNAME` and `TEST_PASSWORD`, and its browser swaps in the real values and masks them in everything the agent reads back.
+- **They stay out of the logs** and the live panel: the runner replaces the values with their names.
+- **They stay out of the tests.** The suite reads them from the environment at run time. A setup step signs in once and the signed-in tests reuse that session.
+- **The agent cannot open your settings files.** Git ignores them too, so they are never committed.
+
+This keeps credentials out of the AI's view, the logs and the repo. It is not a hard security boundary, because the tests themselves need the password to sign in. Use a low-privilege test account on a test environment, never a real user's or an admin's.
+
+Before a full run, `npm run check-login` confirms in about a minute that the test account can sign in.
+
+## What it can and cannot test
+
+**It works on** web apps reachable in a browser, at desktop and phone screen sizes, with or without a login.
+
+**It does not handle:**
+
+- native mobile or desktop apps;
+- sign-in that needs a CAPTCHA, a one-time code (2FA) or an email link;
+- sign-in through another site, such as Google or Microsoft;
+- very large apps in full: it covers the main journeys, not every page.
+
+**Point it at a test environment.** The agent creates accounts and places orders, so it should never run against production or real customer data.
+
+## Your tests stay yours
+
+This repo contains the agent and nothing else. The tests and reports it writes for an app are never added here: they belong to that app's owner and are kept separately and privately.
+
+## Commands
+
+```bash
+npm run generate:demo    # explore, write and run tests, with a visible browser and the live panel
+npm run generate         # the same, in the background
+npm run heal:demo        # repair the suite after the app changed, with browser and panel
+npm run heal             # the same, in the background
+npm run check-login      # confirm the test account can sign in
+npm test                 # replay the suite, no AI involved
+npm run test:ui          # replay it in Playwright's UI mode
+npm run report:html      # build and open the run report as one HTML page (newest run, or name a run id)
+npm run report           # open Playwright's own HTML test report
+npm run panel            # open the live panel and replay a past run
+```
+
+**Other settings**, all optional and listed in `.env.example`:
+
+- `LOGIN_URL`: the sign-in page, if it is hard to find from the app's navigation.
+- `ALLOWED_ORIGINS`: other addresses your app needs, such as an API on a different host. The agent's browser blocks everything except your app's address and these.
+- `EXCLUDED_PATHS`: routes the agent must leave alone. To add them, open the app's settings file (`.env.<name>`, or `.env`) and list the paths with commas between them, for example `EXCLUDED_PATHS=/internal,/api/billing`. Each path starts with `/` and covers everything under it. For a single run, pass `--exclude /internal,/api/billing` instead. Nothing else is skipped, so an admin area you do not list gets tested, and the report names the routes that were left out.
+- `MAX_MINUTES` and `MAX_TURNS`: the run limits. Every run stops by itself when it reaches either one, so a run that gets stuck or keeps repeating a step cannot go on for hours. A turn is one step the agent takes, such as opening a page or writing a file. The defaults are 60 minutes and 500 turns for `generate`, 30 and 300 for `heal`, and 5 and 40 for `check-login`, about three times a normal run. To change them, set them in the app's settings file, for example `MAX_MINUTES=120` and `MAX_TURNS=900`, or pass `--max-minutes 120 --max-turns 900` for a single run. A stopped run keeps what it wrote and says which limit it reached.
+- `STABILITY_RUNS`: the stability check. Once the suite is written and every failure is explained, the agent runs it three times in a row and compares the results. A test that passes on one run and fails on another is flaky: the agent fixes it and repeats the runs, so every report states how many tests are flaky and how many runs that rests on. To change the number, set for example `STABILITY_RUNS=5` in the app's settings file, or pass `--stability-runs 5` for a single run. `1` switches the check off.
+- **Several apps:** give each its own settings file, `.env.<name>`, and add `--site <name>` to a command.
+
+## Licence
+
+[MIT](LICENSE). The tests and reports it writes for your app are yours.
