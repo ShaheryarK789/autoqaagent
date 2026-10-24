@@ -12,9 +12,9 @@ What you keep at the end is an ordinary Playwright suite that you own. Re-runnin
 
 ## Watch a real run
 
-[![The AutoQA Agent testing a public practice shop: the shop's browser window on the left, the agent's live panel on the right. Click to play the video.](docs/media/toolshop-run-cover.jpg)](docs/media/toolshop-run.mp4)
+https://github.com/user-attachments/assets/6003852f-9423-4719-8f73-c48bbb9cec76
 
-A real run on [Toolshop](https://with-bugs.practicesoftwaretesting.com), a public practice shop built with deliberate bugs for testers to find. The agent had never seen it before. The video is sped up 18 times, from 25 minutes to 88 seconds: the agent explores the shop, writes 31 tests, runs them and writes up 16 bugs. Click the picture to play it.
+A real run on [Toolshop](https://with-bugs.practicesoftwaretesting.com), a public practice shop built with deliberate bugs for testers to find. The agent had never seen it before. The video is sped up 18 times, from 25 minutes to 88 seconds: the agent explores the shop, writes 31 tests, runs them and writes up 16 bugs. If the video does not play here, [open it directly](docs/media/toolshop-run.mp4).
 
 ## A real report
 
