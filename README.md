@@ -14,7 +14,7 @@ What you keep at the end is an ordinary Playwright suite that you own. Re-runnin
 
 https://github.com/user-attachments/assets/362de646-0324-424b-afe8-1986b05cbf4d
 
-A real run on [Toolshop](https://with-bugs.practicesoftwaretesting.com), a public practice shop built with deliberate bugs for testers to find. The agent had never seen it before. The video is sped up 18 times, from 25 minutes to 88 seconds: the agent explores the shop, writes 31 tests, runs them and writes up 16 bugs. If the video does not play here, [open it directly](docs/media/toolshop-run.mp4).
+A real run on [Toolshop](https://with-bugs.practicesoftwaretesting.com), a public practice shop built with deliberate bugs for testers to find. The agent had never seen it before. The video is sped up 18 times, from 25 minutes to 88 seconds: the agent explores the shop, writes 31 tests, runs them and writes up 16 bugs. If the video does not play here, [open it directly](https://github.com/user-attachments/assets/362de646-0324-424b-afe8-1986b05cbf4d).
 
 ## A real report
 
