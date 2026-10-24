@@ -47,7 +47,8 @@ const read = (file) => (existsSync(file) ? readFileSync(file, 'utf8') : null);
 
 /**
  * Test counts for the header tiles. Runs from this version on have an exact
- * `summary.json` written by the agent. Older runs do not, so the counts are
+ * `summary.json` written by the agent, which also says how many failed tests
+ * caught a real bug and how many bugs a test proves. Older runs do not, so the counts are
  * read from the report's wording: a repair run's final "N passed, M failed"
  * statement, or the rows of a summary table.
  */
@@ -61,6 +62,8 @@ function summaryCounts(runDir, markdown, isHeal) {
         failed: s.failed,
         flaky: Number.isInteger(s.flaky) ? s.flaky : null,
         stabilityRuns: Number.isInteger(s.stability_runs) && s.stability_runs > 1 ? s.stability_runs : null,
+        failedOnBugs: Number.isInteger(s.failed_on_bugs) ? s.failed_on_bugs : null,
+        bugsFromTests: Number.isInteger(s.bugs_from_tests) ? s.bugs_from_tests : null,
       };
     }
   } catch {
@@ -111,7 +114,8 @@ h1.title{margin:0;font-size:32px;line-height:1.2;letter-spacing:-.01em}
 .tile{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
 .tile .n{font-size:30px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
 .tile .l{font-size:13px;color:var(--muted)}
-.n.pass{color:var(--pass)}.n.fail{color:var(--fail)}
+.tile .s{font-size:12px;color:var(--muted);margin-top:2px}
+.n.pass{color:var(--pass)}.n.fail{color:var(--fail)}.n.warn{color:var(--warn)}
 nav.tabs{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
 nav.tabs .wrap{display:flex;gap:10px;overflow-x:auto;padding-top:12px;padding-bottom:12px}
 nav.tabs a{padding:8px 18px;border-radius:999px;font-size:14.5px;font-weight:700;text-decoration:none;white-space:nowrap;background:var(--accent-soft);color:var(--accent);border:1.5px solid var(--accent);transition:background .15s,color .15s}
@@ -184,13 +188,35 @@ export function buildHtmlReport(runDir) {
     ['journeys', 'Journey map', read(path.join(runDir, 'journeys.md'))],
   ].filter(([, , text]) => text);
 
+  // A test here asserts the correct behaviour, so a test that fails on a real
+  // bug has done its job: the tile calls it "caught a bug", not "failed". Only
+  // failures with another cause (a test still to fix) keep a "Failed" tile, and
+  // only when there are any. Without the agent's split, older runs keep "Failed".
+  // The bug count is split into "proved by a test" and "found while exploring",
+  // since one bug can fail several tests or none.
+  const caught = counts?.failedOnBugs ?? null;
+  const failTiles = (() => {
+    if (!counts) return '';
+    const tile = (n, label, cls = ' fail') => `<div class="tile"><div class="n${n ? cls : ''}">${n}</div><div class="l">${label}</div></div>`;
+    if (isHeal) return tile(counts.failed, 'Still failing');
+    if (caught === null) return tile(counts.failed, 'Failed');
+    const other = counts.failed - caught;
+    return `${tile(caught, caught === 1 ? 'Test caught a bug' : 'Tests caught a bug', ' warn')}
+      ${other > 0 ? tile(other, 'Failed, not a bug yet') : ''}`;
+  })();
+  const byTests = counts?.bugsFromTests ?? null;
+  const bugSplit =
+    byTests === null || !bugs.length
+      ? ''
+      : `<div class="s">${byTests} by tests + ${bugs.length - byTests} while exploring</div>`;
+
   const tiles = counts
     ? `<div class="tiles">
       <div class="tile"><div class="n">${counts.tests}</div><div class="l">Tests</div></div>
       <div class="tile"><div class="n pass">${counts.passed}</div><div class="l">${isHeal ? 'Passed after repair' : 'Passed'}</div></div>
-      <div class="tile"><div class="n${counts.failed ? ' fail' : ''}">${counts.failed}</div><div class="l">${isHeal ? 'Still failing' : 'Failed'}</div></div>
+      ${failTiles}
       ${counts.flaky === null ? '' : `<div class="tile"><div class="n">${counts.flaky}</div><div class="l">${counts.stabilityRuns ? `Flaky in ${counts.stabilityRuns} runs` : 'Flaky'}</div></div>`}
-      <div class="tile"><div class="n${bugs.length ? ' fail' : ''}">${bugs.length}</div><div class="l">Bug reports</div></div>
+      <div class="tile"><div class="n${bugs.length ? ' fail' : ''}">${bugs.length}</div><div class="l">Bugs found</div>${bugSplit}</div>
     </div>`
     : '';
 

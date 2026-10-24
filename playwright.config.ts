@@ -20,6 +20,9 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 7_000 },
   fullyParallel: true,
+  // WORKERS in the site's settings caps parallel browsers, for shared public
+  // apps that throttle bursts of traffic. Left unset, Playwright decides.
+  workers: process.env.WORKERS ? Number(process.env.WORKERS) : undefined,
   retries: process.env.CI ? 1 : 0,
   reporter: [
     ['list'],

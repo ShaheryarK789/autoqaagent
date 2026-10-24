@@ -10,6 +10,32 @@ An AI testing agent built on Claude Code and Playwright. Give it the address of 
 
 What you keep at the end is an ordinary Playwright suite that you own. Re-running it needs no AI and takes seconds.
 
+## Watch a real run
+
+[![The AutoQA Agent testing a public practice shop: the shop's browser window on the left, the agent's live panel on the right. Click to play the video.](docs/media/toolshop-run-cover.jpg)](docs/media/toolshop-run.mp4)
+
+A real run on [Toolshop](https://with-bugs.practicesoftwaretesting.com), a public practice shop built with deliberate bugs for testers to find. The agent had never seen it before. The video is sped up 18 times, from 25 minutes to 88 seconds: the agent explores the shop, writes 31 tests, runs them and writes up 16 bugs. Click the picture to play it.
+
+## A real report
+
+| Tests | Passed | Caught a bug | Bugs found |
+| --- | --- | --- | --- |
+| 31 | 18 | 13 | 16 (12 by tests, 4 while exploring) |
+
+Every test checks that the shop does the right thing. The 18 that passed cover features that work, such as sign-in, search and checkout. The other 13 caught a bug: each one is a real defect, confirmed and written up, not a broken test. The most serious ones:
+
+| ID | Severity | Bug |
+| --- | --- | --- |
+| [BUG-01](examples/toolshop-2026-10-24/bugs/BUG-01-invoices-leak-other-customers.md) | critical | A new customer's invoice list includes other customers' invoices, with their addresses and payment details |
+| [BUG-02](examples/toolshop-2026-10-24/bugs/BUG-02-profile-api-exposes-password-hash.md) | major | The profile data sent to the browser includes the password hash |
+| [BUG-05](examples/toolshop-2026-10-24/bugs/BUG-05-sort-options-reversed.md) | major | Every sort option sorts in the opposite direction |
+| [BUG-06](examples/toolshop-2026-10-24/bugs/BUG-06-checkout-postcode-missing-value.md) | major | Checkout fills the postcode with the text "missing value" |
+| [BUG-13](examples/toolshop-2026-10-24/bugs/BUG-13-payment-fields-ignore-method.md) | major | Every payment method, even cash on delivery, asks for bank account details |
+
+The full report, compiled from the run's own files, with all 16 bugs, the test plan and the journey map: [examples/toolshop-2026-10-24/report.md](examples/toolshop-2026-10-24/report.md). The run ended before its 3-run stability check, so it has no flaky count. The same report as one HTML page, which you can download, open, or print to PDF:
+
+![The HTML report from the same run: 31 tests, 18 passed, 13 caught a bug and 16 bugs found, split into 12 by tests and 4 while exploring.](docs/media/toolshop-report.png)
+
 ## Use it in four steps
 
 You need [Node.js 22](https://nodejs.org), [Git](https://git-scm.com) and [Claude Code](https://code.claude.com) (`npm install -g @anthropic-ai/claude-code`, then run `claude` once to log in). The agent runs on a Claude subscription, so there is no API key to buy.
@@ -120,7 +146,7 @@ Before a full run, `npm run check-login` confirms in about a minute that the tes
 
 ## Your tests stay yours
 
-This repo contains the agent and nothing else. The tests and reports it writes for an app are never added here: they belong to that app's owner and are kept separately and privately.
+This repo contains the agent and nothing else. The tests and reports it writes for an app are never added here: they belong to that app's owner and are kept separately and privately. The only exception is the sample run in `examples/`, on a public practice site.
 
 ## Commands
 
@@ -144,6 +170,7 @@ npm run panel            # open the live panel and replay a past run
 - `EXCLUDED_PATHS`: routes the agent must leave alone. To add them, open the app's settings file (`.env.<name>`, or `.env`) and list the paths with commas between them, for example `EXCLUDED_PATHS=/internal,/api/billing`. Each path starts with `/` and covers everything under it. For a single run, pass `--exclude /internal,/api/billing` instead. Nothing else is skipped, so an admin area you do not list gets tested, and the report names the routes that were left out.
 - `MAX_MINUTES` and `MAX_TURNS`: the run limits. Every run stops by itself when it reaches either one, so a run that gets stuck or keeps repeating a step cannot go on for hours. A turn is one step the agent takes, such as opening a page or writing a file. The defaults are 60 minutes and 500 turns for `generate`, 30 and 300 for `heal`, and 5 and 40 for `check-login`, about three times a normal run. To change them, set them in the app's settings file, for example `MAX_MINUTES=120` and `MAX_TURNS=900`, or pass `--max-minutes 120 --max-turns 900` for a single run. A stopped run keeps what it wrote and says which limit it reached.
 - `STABILITY_RUNS`: the stability check. Once the suite is written and every failure is explained, the agent runs it three times in a row and compares the results. A test that passes on one run and fails on another is flaky: the agent fixes it and repeats the runs, so every report states how many tests are flaky and how many runs that rests on. To change the number, set for example `STABILITY_RUNS=5` in the app's settings file, or pass `--stability-runs 5` for a single run. `1` switches the check off.
+- `WORKERS`: how many browsers run tests at once. Lower it, for example `WORKERS=2`, for a shared public app that slows down or returns errors under a burst of traffic.
 - **Several apps:** give each its own settings file, `.env.<name>`, and add `--site <name>` to a command.
 
 ## Licence

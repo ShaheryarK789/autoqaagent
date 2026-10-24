@@ -164,7 +164,7 @@ function summaryStep(id, runs, when) {
     runs === 1
       ? 'Use null for "flaky": the stability check was off.'
       : `"flaky" is how many tests still gave mixed results in the last ${runs} stability runs. It is always a number: 0 when every test behaved the same in all of them.`;
-  return `Write runs/${id}/summary.json with the final counts ${when}, as exact integers: {"tests": N, "passed": N, "failed": N, "flaky": N, "bugs": N, "stability_runs": ${runs}}. ${flaky}`;
+  return `Write runs/${id}/summary.json with the final counts ${when}, as exact integers: {"tests": N, "passed": N, "failed": N, "failed_on_bugs": N, "flaky": N, "bugs": N, "bugs_from_tests": N, "stability_runs": ${runs}}. "failed_on_bugs" is how many of the failed tests fail because of a reported bug. "bugs_from_tests" is how many of the bugs at least one failing test proves; the rest were found while exploring. ${flaky}`;
 }
 
 // ---------- test account (optional) ----------
@@ -236,7 +236,7 @@ Task: explore this app you have never seen, then write and run an automated Play
 3. Load the playwright-conventions skill. Write page objects, fixtures, data and specs under generated-tests/. Tests use relative URLs; the base URL comes from playwright.config.ts. Tag viewport-specific tests with @mobile in the title.
 4. Run \`npx playwright test\`. For every failure, load the failure-triage skill and classify it. Fix test mistakes. Do not change tests to hide real bugs; write a bug report in runs/${id}/bugs/ instead.
 5. ${stabilityStep(stability)}
-6. Write runs/${id}/report.md: suite summary (tests, passed, failed, flaky), a Stability section, what each failure means, the bug list with severity, and anything you chose not to test.
+6. Write runs/${id}/report.md: suite summary as a table with the columns Tests, Passed, Caught a bug, Other failures, Flaky, Bugs. A test that fails because of a reported bug "caught a bug": never call it failed, so it is not mistaken for a broken test. "Other failures" are failures with any other cause, and should be 0 when you finish, a Stability section, what each failure means, the bug list with severity, and anything you chose not to test.
 7. ${summaryStep(id, stability, 'from the last full run of the suite')}
 
 Keep narrating in one short sentence before each meaningful step.`;
