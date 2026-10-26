@@ -34,6 +34,9 @@ import { createWriteStream, mkdirSync, mkdtempSync, rmSync, writeFileSync } from
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  DEFAULT_LIMITS, SECRET_NAMES, excludedPaths, extraOrigins, makeRedactor, parseArgs, runLimits, stabilityRuns,
+} from './options.mjs';
 import { openInBrowser, startPanel } from './panel.mjs';
 import { buildHtmlReport } from './report-html.mjs';
 import { loadSiteEnv } from './site-env.mjs';
@@ -42,55 +45,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 // ---------- args and env ----------
 
-function parseArgs(argv) {
-  const [command = 'help', ...rest] = argv;
-  const opts = {};
-  for (let i = 0; i < rest.length; i++) {
-    const arg = rest[i];
-    if (!arg.startsWith('--')) continue;
-    const key = arg.slice(2);
-    const next = rest[i + 1];
-    if (next === undefined || next.startsWith('--')) opts[key] = true;
-    else opts[key] = next, i++;
-  }
-  return { command, opts };
-}
-
 function runId(command) {
   const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '').replace('T', '-');
   return `${stamp}-${command}`;
-}
-
-// ---------- extra origins (optional) ----------
-
-// Hosts besides the target that the browser may reach, such as the app's API.
-function extraOrigins() {
-  return (process.env.ALLOWED_ORIGINS ?? '')
-    .split(/[,;\s]+/)
-    .filter(Boolean)
-    .map((value) => {
-      try {
-        return new URL(value.includes('://') ? value : `https://${value}`).origin;
-      } catch {
-        throw new Error(`ALLOWED_ORIGINS has an invalid entry: ${value}`);
-      }
-    });
-}
-
-// ---------- excluded routes (optional) ----------
-
-// Routes the agent must leave alone, from EXCLUDED_PATHS in the site's settings.
-// Nothing is excluded unless it is listed: an app's own admin area is in scope.
-function excludedPaths() {
-  const raw = process.env.EXCLUDED_PATHS;
-  if (raw === undefined) return [];
-  return raw
-    .split(/[,;\s]+/)
-    .filter(Boolean)
-    .map((value) => {
-      if (!value.startsWith('/')) throw new Error(`EXCLUDED_PATHS entries must start with "/": ${value}`);
-      return value;
-    });
 }
 
 function scopeBrief(target) {
@@ -107,30 +64,6 @@ Scope: do not open, call or test these routes or anything under them: ${paths.jo
 
 // ---------- run limits ----------
 
-// About three times the largest normal run of each command.
-const DEFAULT_LIMITS = {
-  generate: { minutes: 60, turns: 500 },
-  heal: { minutes: 30, turns: 300 },
-  'check-login': { minutes: 5, turns: 40 },
-};
-
-// The limits for this run: the command's defaults, unless MAX_MINUTES or
-// MAX_TURNS (or their flags) say otherwise.
-function runLimits(command, opts) {
-  const pick = (flag, envName, fallback) => {
-    const raw = typeof opts[flag] === 'string' ? opts[flag] : process.env[envName];
-    if (raw === undefined) return fallback;
-    const value = Number(raw);
-    if (!Number.isFinite(value) || value <= 0) throw new Error(`${envName} must be a number above 0, got: ${raw}`);
-    return value;
-  };
-  const defaults = DEFAULT_LIMITS[command];
-  return {
-    minutes: pick('max-minutes', 'MAX_MINUTES', defaults.minutes),
-    turns: Math.floor(pick('max-turns', 'MAX_TURNS', defaults.turns)),
-  };
-}
-
 // Stop the agent and everything it started (its browser included). On Windows
 // the child is a shell, so killing it alone would leave the agent running.
 function stopProcessTree(child) {
@@ -142,16 +75,6 @@ function stopProcessTree(child) {
 }
 
 // ---------- stability check ----------
-
-// How many times in a row the finished suite is run to find flaky tests.
-// 1 switches the check off.
-function stabilityRuns(opts) {
-  const raw = typeof opts['stability-runs'] === 'string' ? opts['stability-runs'] : process.env.STABILITY_RUNS;
-  if (raw === undefined) return 3;
-  const value = Number(raw);
-  if (!Number.isInteger(value) || value < 1) throw new Error(`STABILITY_RUNS must be a whole number, 1 or more, got: ${raw}`);
-  return value;
-}
 
 // The stability step of a task, and what the summary must say about it.
 function stabilityStep(runs) {
@@ -168,8 +91,6 @@ function summaryStep(id, runs, when) {
 }
 
 // ---------- test account (optional) ----------
-
-const SECRET_NAMES = ['TEST_USERNAME', 'TEST_PASSWORD'];
 
 // The test account from .env, or null when the target needs no login.
 function loginConfig(opts) {
@@ -196,20 +117,6 @@ function writeSecretsFile() {
   const remove = () => rmSync(dir, { recursive: true, force: true });
   process.on('exit', remove);
   return { file, remove };
-}
-
-// Replace secret values with their names in anything that is logged or shown.
-function makeRedactor() {
-  const pairs = [];
-  for (const name of SECRET_NAMES) {
-    const value = process.env[name];
-    if (!value) continue;
-    pairs.push([value, `[${name}]`]);
-    const json = JSON.stringify(value).slice(1, -1);
-    if (json !== value) pairs.push([json, `[${name}]`]);
-  }
-  pairs.sort((a, b) => b[0].length - a[0].length);
-  return (text) => pairs.reduce((t, [value, label]) => t.replaceAll(value, label), text);
 }
 
 function loginBrief(login) {

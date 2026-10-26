@@ -52,7 +52,7 @@ const read = (file) => (existsSync(file) ? readFileSync(file, 'utf8') : null);
  * read from the report's wording: a repair run's final "N passed, M failed"
  * statement, or the rows of a summary table.
  */
-function summaryCounts(runDir, markdown, isHeal) {
+export function summaryCounts(runDir, markdown, isHeal) {
   try {
     const s = JSON.parse(readFileSync(path.join(runDir, 'summary.json'), 'utf8'));
     if (Number.isInteger(s.passed) && Number.isInteger(s.failed)) {
@@ -90,7 +90,7 @@ function summaryCounts(runDir, markdown, isHeal) {
   return isHeal ? (fromPhrase ?? fromTable) : (fromTable ?? fromPhrase);
 }
 
-function bugMeta(markdown) {
+export function bugMeta(markdown) {
   const title = markdown.match(/^#\s+(.+)$/m)?.[1].trim() ?? 'Bug';
   const severity = markdown.match(/^\**Severity\**\s*:\s*\**\s*([A-Za-z]+)/im)?.[1].toLowerCase() ?? null;
   return { title, severity };
