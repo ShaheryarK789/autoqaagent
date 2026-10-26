@@ -34,7 +34,13 @@ Every test checks that the shop does the right thing. The 18 that passed cover f
 | [BUG-06](examples/toolshop-2026-10-24/bugs/BUG-06-checkout-postcode-missing-value.md) | major | Checkout fills the postcode with the text "missing value" |
 | [BUG-13](examples/toolshop-2026-10-24/bugs/BUG-13-payment-fields-ignore-method.md) | major | Every payment method, even cash on delivery, asks for bank account details |
 
-The full report, compiled from the run's own files, with all 16 bugs, the test plan and the journey map: [examples/toolshop-2026-10-24/report.md](examples/toolshop-2026-10-24/report.md). The run ended before its 3-run stability check, so it has no flaky count. The same report as one HTML page, which you can download, open, or print to PDF:
+The full report, compiled from the run's own files, with all 16 bugs, the test plan and the journey map: [examples/toolshop-2026-10-24/report.md](examples/toolshop-2026-10-24/report.md).
+
+**The suite it wrote** is in [examples/toolshop-2026-10-24/suite](examples/toolshop-2026-10-24/suite), exactly as the agent left it: 31 tests in 908 lines of TypeScript, with page objects, fixtures, role-based locators and no hard waits.
+
+**Stable on re-runs, without the AI.** The agent's run stopped before its own stability check, so that check was finished afterwards. The suite ran 3 times in a row, unchanged, in about 2.5 minutes each and with no AI involved. **0 tests were flaky**: all 31 gave the same result every time. Two days after the agent's run, 2 checkout tests started failing because the shop's server rejects every order (HTTP 500). The tests were left asserting that an order goes through. Details: [stability.md](examples/toolshop-2026-10-24/stability.md).
+
+The same report as one HTML page, which you can download, open, or print to PDF:
 
 ![The HTML report from the same run: 31 tests, 18 passed, 13 caught a bug and 16 bugs found, split into 12 by tests and 4 while exploring.](docs/media/toolshop-report.png)
 
