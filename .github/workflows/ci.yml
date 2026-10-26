@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Unit tests (${{ matrix.os }})
+    # The runner has Windows-specific code (shell quoting, stopping the process tree), so test both.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Syntax check every script
+        run: for file in bin/*.mjs; do node --check "$file"; done
+      - name: Unit tests
+        run: npm run test:unit
+      - name: Published score matches its inputs
+        # Re-scores the example run; fails if score.md was edited by hand or not regenerated.
+        run: |
+          npm run score -- examples/toolshop-2026-10-24
+          git diff --exit-code -- examples/toolshop-2026-10-24/score.md

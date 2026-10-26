@@ -1,5 +1,7 @@
 # AutoQA Agent
 
+[![CI](https://github.com/shaheryark789/autoqaagent/actions/workflows/ci.yml/badge.svg)](https://github.com/shaheryark789/autoqaagent/actions/workflows/ci.yml)
+
 An AI testing agent built on Claude Code and Playwright. Give it the address of your web app and it works like a QA engineer who has just joined your team:
 
 1. **Explores** the app in a real browser and maps its user journeys.
@@ -35,6 +37,23 @@ Every test checks that the shop does the right thing. The 18 that passed cover f
 The full report, compiled from the run's own files, with all 16 bugs, the test plan and the journey map: [examples/toolshop-2026-10-24/report.md](examples/toolshop-2026-10-24/report.md). The run ended before its 3-run stability check, so it has no flaky count. The same report as one HTML page, which you can download, open, or print to PDF:
 
 ![The HTML report from the same run: 31 tests, 18 passed, 13 caught a bug and 16 bugs found, split into 12 by tests and 4 while exploring.](docs/media/toolshop-report.png)
+
+## Scored against the planted bugs
+
+Toolshop's maintainers publish the [list of 94 bugs they planted](https://github.com/testsmith-io/practice-software-testing/blob/7766cb71f564c63c2a7f99180a46f089e0527199/sprint5-with-bugs/testSessions/listOfBugs.md), so the run can be scored against a real answer key, not just its own claims.
+
+**All 16 bug reports describe a planted bug, so there were no false alarms. Together they cover 24 of the 94 (26%).** That share depends on what kind of bug it is:
+
+| Kind of bug | Planted | Found |
+| --- | --- | --- |
+| Behaviour, data and text a user sees | 42 | 21 (50%) |
+| Problems in the API responses the app loads | 4 | 2 (50%) |
+| Accessibility: labels, alt text, contrast, keyboard order | 11 | 1 |
+| Pixel-level layout, or only in Firefox or Edge | 27 | 0 |
+| Needs deliberate attacks or crafted API calls | 9 | 0 |
+| Only in emails the app sends | 1 | 0 |
+
+The bottom three rows are outside what this run did. It used Chromium only and compared no screenshots, sent no attack payloads and read no email. The misses that were in reach are the next things to improve. For example, the agent never opened an invoice's own page, changed a profile, or tried uploading files on the contact form. The shop links to a "Bug Hunting Guide", and the agent chose not to open it because it would give away the answers. Every match was judged by hand after the run and is recorded with its reasoning, so it can be checked: [matches.json](examples/toolshop-2026-10-24/matches.json) and the full [score](examples/toolshop-2026-10-24/score.md), including each missed bug. CI re-scores the run on every push.
 
 ## Use it in four steps
 
@@ -161,6 +180,8 @@ npm run test:ui          # replay it in Playwright's UI mode
 npm run report:html      # build and open the run report as one HTML page (newest run, or name a run id)
 npm run report           # open Playwright's own HTML test report
 npm run panel            # open the live panel and replay a past run
+npm run score -- <run>   # score a run against an app's planted-bug list (needs the run's matches.json)
+npm run test:unit        # the agent's own unit tests
 ```
 
 **Other settings**, all optional and listed in `.env.example`:
@@ -172,6 +193,17 @@ npm run panel            # open the live panel and replay a past run
 - `STABILITY_RUNS`: the stability check. Once the suite is written and every failure is explained, the agent runs it three times in a row and compares the results. A test that passes on one run and fails on another is flaky: the agent fixes it and repeats the runs, so every report states how many tests are flaky and how many runs that rests on. To change the number, set for example `STABILITY_RUNS=5` in the app's settings file, or pass `--stability-runs 5` for a single run. `1` switches the check off.
 - `WORKERS`: how many browsers run tests at once. Lower it, for example `WORKERS=2`, for a shared public app that slows down or returns errors under a burst of traffic.
 - **Several apps:** give each its own settings file, `.env.<name>`, and add `--site <name>` to a command.
+
+## Testing the agent itself
+
+The agent's own code is tested too: `npm run test:unit` runs about 50 unit tests with Node's built-in test runner, no extra dependencies. They cover the parts that must not fail quietly:
+
+- **Secrets stay hidden:** the redactor replaces the test account's values in logs, including inside JSON and when one value contains the other.
+- **The report is safe and honest:** HTML quoted from the app under test is shown as text, never run. A test that caught a bug is never counted as a failure. Counts still come out right for older runs without `summary.json`.
+- **Settings resolve in a fixed order:** flag, then environment, then site file, then `.env`. Bad limits and malformed routes are rejected.
+- **The score cannot drift:** every bug report must be accounted for, and unknown bug IDs are rejected.
+
+[CI](.github/workflows/ci.yml) runs them on Linux and Windows on every push, since the runner has Windows-specific process handling.
 
 ## Licence
 
