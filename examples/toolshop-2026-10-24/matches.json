@@ -1,0 +1,36 @@
+{
+  "answer_key": "benchmarks/toolshop/answer-key.json",
+  "method": "Each bug report was compared by hand with the maintainers' list after the run. \"exact\": the report describes that planted bug. \"partial\": it describes part of it, or the list's wording is too short to be sure.",
+  "coverage": "One run: Chromium on desktop and a Pixel 7 screen, through the app's own pages and the API calls they make. No Firefox or Edge, no pixel comparison, no attack payloads, no email.",
+  "matches": [
+    { "report": "BUG-01", "planted": [{ "id": 78, "fit": "exact" }] },
+    { "report": "BUG-02", "planted": [{ "id": 73, "fit": "partial" }], "note": "The list names internal fields such as failed_login_attempts; the report leads with the password hash and also names failed_login_attempts." },
+    { "report": "BUG-03", "planted": [{ "id": 40, "fit": "exact" }] },
+    { "report": "BUG-04", "planted": [{ "id": 8, "fit": "exact" }] },
+    { "report": "BUG-05", "planted": [{ "id": 2, "fit": "exact" }] },
+    { "report": "BUG-06", "planted": [{ "id": 10, "fit": "exact" }] },
+    { "report": "BUG-07", "planted": [{ "id": 36, "fit": "exact" }, { "id": 37, "fit": "exact" }] },
+    { "report": "BUG-08", "planted": [{ "id": 32, "fit": "exact" }] },
+    { "report": "BUG-09", "planted": [{ "id": 43, "fit": "exact" }, { "id": 41, "fit": "exact" }] },
+    { "report": "BUG-10", "planted": [{ "id": 52, "fit": "exact" }] },
+    { "report": "BUG-11", "planted": [{ "id": 3, "fit": "exact" }] },
+    { "report": "BUG-12", "planted": [{ "id": 29, "fit": "exact" }] },
+    { "report": "BUG-13", "planted": [{ "id": 12, "fit": "exact" }] },
+    { "report": "BUG-14", "planted": [{ "id": 27, "fit": "exact" }] },
+    {
+      "report": "BUG-15",
+      "planted": [
+        { "id": 31, "fit": "exact" }, { "id": 33, "fit": "exact" }, { "id": 34, "fit": "exact" },
+        { "id": 42, "fit": "exact" }, { "id": 60, "fit": "exact" }, { "id": 9, "fit": "partial" }
+      ],
+      "note": "The list titles bug 9 only as a Billing Address typo; the report quotes the heading \"Blliling Adress\"."
+    },
+    { "report": "BUG-16", "planted": [{ "id": 11, "fit": "exact" }, { "id": 91, "fit": "exact" }] }
+  ],
+  "not_on_list": [
+    { "report": "BUG-11", "finding": "A Categories menu entry labelled \"UNDEFINED\" opens an empty category" },
+    { "report": "BUG-13", "finding": "Every payment method asks for the same bank account fields" },
+    { "report": "BUG-15", "finding": "Placeholder brand names \"Brand name 1\" to \"Brand name 10\"" },
+    { "report": "BUG-16", "finding": "The home page requests /broken.png, which returns 404. It is probably planted bug 28 or 30, but the report does not say which image, so it is not counted" }
+  ]
+}

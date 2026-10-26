@@ -14,6 +14,7 @@
     "test:ui": "playwright test --ui",
     "report": "npx playwright show-report",
     "report:html": "node bin/report-html.mjs --open",
+    "score": "node bin/score.mjs",
     "test:unit": "node --test \"test/*.test.mjs\""
   },
   "license": "MIT",
