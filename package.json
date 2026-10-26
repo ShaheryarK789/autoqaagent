@@ -13,7 +13,8 @@
     "test": "node bin/autoqa.mjs test",
     "test:ui": "playwright test --ui",
     "report": "npx playwright show-report",
-    "report:html": "node bin/report-html.mjs --open"
+    "report:html": "node bin/report-html.mjs --open",
+    "test:unit": "node --test \"test/*.test.mjs\""
   },
   "license": "MIT",
   "type": "module",
