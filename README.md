@@ -143,6 +143,8 @@ UI changes are the main reason test suites rot. `npm run heal` re-runs the suite
 
 The second half matters as much as the first. A tool that makes every red test green hides the bugs the suite exists to catch.
 
+**Tried on Toolshop:** three locators in the suite were renamed on purpose to simulate a UI change. Nobody told the agent what changed. It repaired exactly those three lines, in the page objects, and left all 15 tests that fail on real bugs failing. It also refused to paper over 4 flaky tests with retries, because the shop itself had stopped serving pages. The full run: [examples/toolshop-heal-2026-10-26](examples/toolshop-heal-2026-10-26).
+
 ## Credentials
 
 For apps with a login, the agent signs in with a test account without being given its password:

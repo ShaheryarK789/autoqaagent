@@ -1,0 +1,10 @@
+{
+  "tests": 31,
+  "passed": 16,
+  "failed": 15,
+  "failed_on_bugs": 15,
+  "flaky": 4,
+  "bugs": 16,
+  "bugs_from_tests": 13,
+  "stability_runs": 3
+}

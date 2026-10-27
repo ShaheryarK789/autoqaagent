@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heal report: Toolshop suite, 2026-10-26</title>
+<style>
+:root{--bg:#f6f8fa;--card:#fff;--fg:#1c2530;--muted:#57636f;--line:#dfe5ea;--accent:#0b7a53;--accent-soft:#e6f4ee;
+--pass:#0b7a53;--fail:#b3261e;--warn:#8a5a00;--code:#f0f3f6;--critical:#b3261e;--major:#8a5a00;--minor:#57636f}
+@media (prefers-color-scheme:dark){:root{--bg:#0f141a;--card:#161d25;--fg:#e6edf3;--muted:#9aa7b4;--line:#2a333d;
+--accent:#3fcf8e;--accent-soft:#12291f;--pass:#3fcf8e;--fail:#ff8a80;--warn:#f0b849;--code:#1e2731;--critical:#ff8a80;--major:#f0b849;--minor:#9aa7b4}}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 "Segoe UI",system-ui,-apple-system,sans-serif}
+header.top{background:var(--card);border-bottom:1px solid var(--line)}
+.wrap{max-width:960px;margin:0 auto;padding:0 24px}
+.brand{display:flex;align-items:center;gap:10px;padding:22px 0 6px;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.mark{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;background:var(--accent);color:var(--card);font-size:12px;font-weight:800;letter-spacing:0}
+h1.title{margin:0;font-size:32px;line-height:1.2;letter-spacing:-.01em}
+.meta{display:flex;flex-wrap:wrap;gap:6px 22px;margin:10px 0 0;padding:0 0 22px;color:var(--muted);font-size:14px}
+.meta b{color:var(--fg);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;padding:0 0 24px}
+.tile{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.tile .n{font-size:30px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile .l{font-size:13px;color:var(--muted)}
+.tile .s{font-size:12px;color:var(--muted);margin-top:2px}
+.n.pass{color:var(--pass)}.n.fail{color:var(--fail)}.n.warn{color:var(--warn)}
+nav.tabs{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:10px;overflow-x:auto;padding-top:12px;padding-bottom:12px}
+nav.tabs a{padding:8px 18px;border-radius:999px;font-size:14.5px;font-weight:700;text-decoration:none;white-space:nowrap;background:var(--accent-soft);color:var(--accent);border:1.5px solid var(--accent);transition:background .15s,color .15s}
+nav.tabs a:hover,nav.tabs a.active{background:var(--accent);color:var(--card)}
+nav.tabs .count{margin-left:8px;padding:1px 8px;border-radius:999px;background:var(--accent);color:var(--card);font-size:12px}
+nav.tabs a:hover .count,nav.tabs a.active .count{background:var(--card);color:var(--accent)}
+main{padding:28px 0 60px}
+section.doc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 32px 28px;margin:0 0 24px;scroll-margin-top:76px}
+.kicker{margin:24px 0 0;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.md h1{font-size:24px;margin:6px 0 14px;line-height:1.3}
+.md h2{font-size:19px;margin:30px 0 10px;padding-top:18px;border-top:1px solid var(--line)}
+.md h3{font-size:16px;margin:22px 0 8px}.md h4{font-size:15px;margin:18px 0 6px}
+.md p{margin:10px 0}.md ul,.md ol{margin:10px 0;padding-left:24px}.md li{margin:4px 0}
+.md a{color:var(--accent)}
+.md code{font:13.5px/1.5 ui-monospace,"Cascadia Code",Consolas,monospace;background:var(--code);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+.md pre{background:var(--code);border-radius:8px;padding:14px 16px;overflow-x:auto}.md pre code{background:none;padding:0;overflow-wrap:normal}
+.md blockquote{margin:14px 0;padding:6px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0}
+.table{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:8px}
+.md table{border-collapse:collapse;width:100%;font-size:14.5px}
+.md th,.md td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+.md th{background:var(--bg);font-weight:600;white-space:nowrap}.md tr:last-child td{border-bottom:0}
+.bug{border-top:1px solid var(--line);padding-top:6px;margin-top:26px;scroll-margin-top:76px}.bug:first-of-type{border-top:0;margin-top:0}
+.badge{display:inline-block;margin:14px 0 0;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border:1px solid currentColor}
+.badge.critical{color:var(--critical)}.badge.major{color:var(--major)}.badge.minor{color:var(--minor)}
+figure{margin:16px 0 0}figure img{max-width:100%;border:1px solid var(--line);border-radius:8px;display:block}
+figcaption{font-size:13px;color:var(--muted);margin-top:6px}
+footer{color:var(--muted);font-size:13px;text-align:center;padding:0 0 40px}
+@media print{body{background:#fff}nav.tabs{display:none}section.doc{border:0;padding:0;break-inside:auto}.bug{break-inside:avoid}main{padding-top:10px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><span class="mark">QA</span>AutoQA report</div>
+  <h1 class="title">Heal report: Toolshop suite, 2026-10-26</h1>
+  <p class="meta"><span>Self-healing run</span><span>Started <b>2026-10-26 15:31 UTC</b></span><span>Run <b>20261026-153149-heal</b></span></p>
+  <div class="tiles">
+      <div class="tile"><div class="n">31</div><div class="l">Tests</div></div>
+      <div class="tile"><div class="n pass">16</div><div class="l">Passed after repair</div></div>
+      <div class="tile"><div class="n fail">15</div><div class="l">Still failing</div></div>
+      <div class="tile"><div class="n">4</div><div class="l">Flaky in 3 runs</div></div>
+      <div class="tile"><div class="n fail">16</div><div class="l">Bugs found</div><div class="s">13 by tests + 3 while exploring</div></div>
+    </div>
+</div></header>
+<nav class="tabs" aria-label="Sections"><div class="wrap">
+  <a href="#report">Report</a>
+  <a href="#bugs">Bug reports<span class="count">16</span></a>
+  
+</div></nav>
+<main><div class="wrap">
+<section class="doc md" id="report"><p class="kicker">Report</p><p>Target: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a> (Chromium, Desktop Chrome 1280x720 and the mobile project), 2 workers.</p>
+<h2>Result</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th></th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Tests (including the setup step)</td>
+<td>31</td>
+</tr>
+<tr>
+<td>Passed</td>
+<td>16</td>
+</tr>
+<tr>
+<td>Failed</td>
+<td>15</td>
+</tr>
+<tr>
+<td>Failed because of a reported bug</td>
+<td>15</td>
+</tr>
+<tr>
+<td>Flaky in the 3 stability runs</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Bugs reported</td>
+<td>16 (13 proven by failing tests, 3 found while exploring)</td>
+</tr>
+</tbody></table></div>
+<p>All 15 remaining failures are reported app bugs. The 4 flaky tests flaked because the shop failed to serve pages (BUG-18), not because of a test fault. See Stability.</p>
+<h2>What changed in the app, and the repairs</h2>
+<p>The first run failed in setup, so 30 tests never ran. Once setup passed, 27 of 30 failed. 13 of those were the known bug tests. The other failures came from three renamed controls, plus the two checkout tests that also fail on an app bug (BUG-17).</p>
+<h3>Locator repairs (broken locator, confidence 95%)</h3>
+<p>Each control still exists with the same <code>data-test</code> id and the same behaviour; only its accessible name or test id changed. Every fix is in a page object; no spec was edited.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Page object</th>
+<th>Before</th>
+<th>After</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>generated-tests/pages/product.page.ts</code> <code>addToCartButton</code></td>
+<td><code>page.getByRole(&#39;button&#39;, { name: &#39;Add to basket&#39; })</code></td>
+<td><code>page.getByRole(&#39;button&#39;, { name: &#39;Add to cart&#39; })</code></td>
+<td>Product page buttons: <code>{&quot;text&quot;:&quot;Add to cart&quot;,&quot;test&quot;:&quot;add-to-cart&quot;}</code>. No &quot;Add to basket&quot; button exists. Clicking it still adds the item.</td>
+</tr>
+<tr>
+<td><code>generated-tests/pages/catalog.page.ts</code> <code>searchBox</code></td>
+<td><code>page.getByTestId(&#39;search-input&#39;)</code></td>
+<td><code>page.getByTestId(&#39;search-query&#39;)</code></td>
+<td>The search form&#39;s input is now <code>data-test=&quot;search-query&quot;</code>. Searching &quot;pliers&quot; with it calls <code>/products/search?q=pliers</code> (200) and lists the same 4 pliers.</td>
+</tr>
+<tr>
+<td><code>generated-tests/pages/contact.page.ts</code> <code>send</code></td>
+<td><code>page.getByRole(&#39;button&#39;, { name: &#39;Send message&#39; })</code></td>
+<td><code>page.getByRole(&#39;button&#39;, { name: &#39;Send&#39;, exact: true })</code></td>
+<td>The submit is <code>&lt;input type=&quot;submit&quot; value=&quot;Send&quot; data-test=&quot;contact-submit&quot;&gt;</code>. The guest and signed-in field labels are unchanged.</td>
+</tr>
+</tbody></table></div>
+<p>Failures these fixed (14): every test that opens a product page (cart x5, checkout x3, favourites, mobile cart total), both catalogue search tests, and all 3 contact tests. Some of them then failed on their known bug instead.</p>
+<p>No timing, test-data or test-logic repairs were needed. I temporarily added a response log to <code>checkout.page.ts</code> to capture the <code>POST /invoices</code> status, then removed it. The file is back to its original content.</p>
+<h2>Failure triage</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Classification</th>
+<th>Evidence (expected / actual / rule broken)</th>
+<th>Confidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>auth.setup.ts</code> register and sign in (first run only)</td>
+<td>Real bug, BUG-18</td>
+<td>Expected the My account heading after sign-in and reload. Got a page with only the header and footer. In the browser, a lazy route script failed with <code>ERR_CONNECTION_RESET</code>. Passed in every later run.</td>
+<td>80%</td>
+</tr>
+<tr>
+<td>14 tests listed above</td>
+<td>Broken locator, repaired</td>
+<td>See table above</td>
+<td>95%</td>
+</tr>
+<tr>
+<td>account &gt; header user menu shows the customer name</td>
+<td>Real bug, BUG-08</td>
+<td>Expected &quot;Qa Tester&quot;, got &quot;User Data not found&quot;</td>
+<td>95%</td>
+</tr>
+<tr>
+<td>account &gt; profile shows own name and city</td>
+<td>Real bug, BUG-07</td>
+<td>First Name field shows &quot;Tester&quot;, City &quot;City not found&quot;</td>
+<td>95%</td>
+</tr>
+<tr>
+<td>account &gt; profile data has no password hash</td>
+<td>Real bug, BUG-02</td>
+<td><code>/users/me</code> contains <code>password</code></td>
+<td>99%</td>
+</tr>
+<tr>
+<td>account &gt; My invoices only own invoices</td>
+<td>Real bug, BUG-01</td>
+<td>Received other owners <code>[2, 3]</code></td>
+<td>99%</td>
+</tr>
+<tr>
+<td>auth &gt; Country and State labels</td>
+<td>Real bug, BUG-10</td>
+<td>No combobox named &quot;Country&quot;; the drop-down is labelled &quot;State&quot;</td>
+<td>95%</td>
+</tr>
+<tr>
+<td>cart &gt; each cart line shows unit price x quantity</td>
+<td>Real bug, BUG-04</td>
+<td>Expected $18.34, got &quot;$00.00&quot;</td>
+<td>99%</td>
+</tr>
+<tr>
+<td>cart &gt; + button raises the quantity</td>
+<td>Real bug, BUG-03</td>
+<td>Expected 2, got 1</td>
+<td>95%</td>
+</tr>
+<tr>
+<td>cart &gt; adding to the cart does not report an error</td>
+<td>Real bug, BUG-09</td>
+<td>Item added, toast &quot;Oeps, something went wrong.&quot;</td>
+<td>95%</td>
+</tr>
+<tr>
+<td>catalog &gt; &quot;Price (Low - High)&quot;</td>
+<td>Real bug, BUG-05</td>
+<td>Request sends <code>sort=price,desc</code>; most expensive first</td>
+<td>99%</td>
+</tr>
+<tr>
+<td>catalog &gt; &quot;Name (A - Z)&quot;</td>
+<td>Real bug, BUG-05</td>
+<td>Names come back in reverse order</td>
+<td>99%</td>
+</tr>
+<tr>
+<td>checkout &gt; address step prefills the postcode</td>
+<td>Real bug, BUG-06</td>
+<td>Expected 12345, got &quot;missing value&quot;</td>
+<td>95%</td>
+</tr>
+<tr>
+<td>checkout &gt; buys two items by bank transfer</td>
+<td>Real bug, BUG-17</td>
+<td><code>POST /invoices</code> -&gt; 500 <code>{&quot;message&quot;:&quot;Something went wrong&quot;}</code>; no confirmation or error shown</td>
+<td>85%</td>
+</tr>
+<tr>
+<td>checkout &gt; newly placed order appears in My invoices</td>
+<td>Real bug, BUG-17</td>
+<td>Same as above</td>
+<td>85%</td>
+</tr>
+<tr>
+<td>navigation &gt; every Categories entry opens a category with products</td>
+<td>Real bug, BUG-11</td>
+<td>&quot;UNDEFINED&quot; category has 0 products; Chainsaws/Rentals leave the category routes</td>
+<td>95%</td>
+</tr>
+<tr>
+<td>navigation &gt; header Home link opens the catalogue</td>
+<td>Real bug, BUG-12</td>
+<td>Home link href is <code>#/contact</code></td>
+<td>99%</td>
+</tr>
+</tbody></table></div>
+<h3>How BUG-17 was separated from a test problem</h3>
+<p>The two order tests passed when the checkout spec ran alone at about 15:47 UTC, and failed in every full-suite run. That pattern looks like test interference, so I checked before calling it a bug:</p>
+<ul>
+<li>The failing request is identical to accepted ones (same customer, product, address and payment fields).</li>
+<li>It fails for brand-new customers too, including when only the checkout spec runs, straight after a full-suite run.</li>
+<li>I reproduced it by hand outside the test runner (2 manual orders → 500 at about 15:55 UTC). At other times, 10 manual orders went through.</li>
+<li>Ruled out: token expiry (the token lasts 180 days), favourites on the account, and the number of earlier orders.</li>
+<li>The shop&#39;s own invoice list has no successful order from anyone between 15:47:48 and 15:58:40.</li>
+</ul>
+<p>The server rejects a valid order and the page gives the customer no feedback, so this is an app bug. The tests are left asserting the correct behaviour: an order that goes through.</p>
+<h2>Bugs</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Bug</th>
+<th>Title</th>
+<th>Severity</th>
+<th>Proven by a failing test</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>BUG-01</td>
+<td>My invoices returns other customers&#39; invoices</td>
+<td>critical</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>BUG-17</td>
+<td>Placing an order intermittently fails with HTTP 500, and the checkout shows nothing</td>
+<td>critical</td>
+<td>yes (2 tests)</td>
+</tr>
+<tr>
+<td>BUG-02</td>
+<td>Profile API sends the password hash to the browser</td>
+<td>major</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>BUG-03</td>
+<td>Product page &quot;+&quot; quantity button does nothing</td>
+<td>major</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>BUG-04</td>
+<td>Cart line total always shows &quot;$00.00&quot;</td>
+<td>major</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>BUG-05</td>
+<td>Sort options sort in the opposite direction</td>
+<td>major</td>
+<td>yes (2 tests)</td>
+</tr>
+<tr>
+<td>BUG-06</td>
+<td>Checkout postcode prefilled with &quot;missing value&quot;</td>
+<td>major</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>BUG-07</td>
+<td>Profile shows names swapped and City &quot;City not found&quot;</td>
+<td>major</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>BUG-11</td>
+<td>Categories menu has &quot;UNDEFINED&quot; and broken entries</td>
+<td>major</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>BUG-18</td>
+<td>Shop intermittently fails to load pages, scripts and product lists</td>
+<td>major</td>
+<td>only as flaky failures (stability run 1); no test fails on it in the final run</td>
+</tr>
+<tr>
+<td>BUG-08</td>
+<td>Header user menu reads &quot;User Data not found&quot;</td>
+<td>minor</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>BUG-09</td>
+<td>Successful add to cart shows an error toast</td>
+<td>minor</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>BUG-10</td>
+<td>Registration &quot;State&quot; and &quot;Country&quot; labels swapped</td>
+<td>minor</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>BUG-12</td>
+<td>Header &quot;Home&quot; link opens the Contact page</td>
+<td>minor</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>BUG-15</td>
+<td>Typos in visible labels (&quot;Contakt&quot;, &quot;Sorth&quot;, &quot;Serch&quot;)</td>
+<td>minor</td>
+<td>no, found while exploring</td>
+</tr>
+<tr>
+<td>BUG-16</td>
+<td>Unnamed form controls and a broken image</td>
+<td>minor</td>
+<td>no, found while exploring</td>
+</tr>
+</tbody></table></div>
+<p>Each bug has a report in <code>bugs/</code>. I reproduced every test-proven bug in the browser today with a fresh customer. BUG-13 (payment fields ignore the method) and BUG-14 (price filter upper bound) from the 2026-10-24 run were not re-checked in this run, so they are not counted here.</p>
+<p>Also noted, not counted as a bug: between 16:00 and 16:04 UTC the shop dropped every account registered today (new user ids restarted at 5). This looks like the demo&#39;s scheduled data reset. The suite registers its own customer at the start of each run, so only a run that spans a reset would be affected.</p>
+<h2>Stability</h2>
+<p>3 full runs of <code>npx playwright test</code>, back to back, with no file changed between or during them (the last file change, removing the temporary diagnostic, came before run 1).</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Run</th>
+<th>Passed</th>
+<th>Failed</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>12</td>
+<td>19</td>
+</tr>
+<tr>
+<td>2</td>
+<td>16</td>
+<td>15</td>
+</tr>
+<tr>
+<td>3</td>
+<td>16</td>
+<td>15</td>
+</tr>
+</tbody></table></div>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Tests</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Stable pass</td>
+<td>12</td>
+</tr>
+<tr>
+<td>Consistent failure (each one a reported bug, same error every run)</td>
+<td>15</td>
+</tr>
+<tr>
+<td>Flaky</td>
+<td>4</td>
+</tr>
+</tbody></table></div>
+<p>The 4 flaky tests failed in run 1 and passed in runs 2 and 3:</p>
+<ul>
+<li><code>cart.spec.ts</code> &gt; an out-of-stock product cannot be added to the cart: the product page never rendered (waiting for &quot;Add to cart&quot;).</li>
+<li><code>catalog.spec.ts</code> &gt; searching &quot;pliers&quot; lists only pliers, searching a nonsense term reports no products, the Hammer category filter lists only hammers: the catalogue rendered its filters but no products, or <code>page.goto</code> failed with <code>net::ERR_ABORTED</code>.</li>
+</ul>
+<p>Cause: the shop failed to serve its pages and product API for a stretch of run 1 (BUG-18). Each of these tests passes whenever the shop responds; they share no data and don&#39;t depend on test order. The only test-side &quot;fix&quot; would be a retry or a longer wait, which the house rules forbid and which would hide a real availability problem. So I changed no file, reported the cause as BUG-18 (with how often it happened) and counted these 4 tests as flaky. Earlier runs today showed the same pattern in other tests (setup, mobile cart total, cart quantity recalculation, signed-in contact). All of them passed in every stability run.</p>
+<p>Fixed along the way: the 3 locator repairs above. Nothing was changed during the stability runs.</p>
+<h2>Final count</h2>
+<p>31 tests: 16 passed, 15 failed. All 15 failures are reported bugs (BUG-01 to BUG-12 and BUG-17). Flaky: 4, caused by the shop&#39;s intermittent failures (BUG-18).</p>
+</section>
+<section class="doc" id="bugs"><p class="kicker">Bug reports</p>
+<article class="bug md" id="bug-BUG-01-invoices-leak-other-customers">
+<span class="badge critical">critical</span>
+<h1>BUG-01 My invoices returns other customers&#39; invoices (personal data leak)</h1>
+<p>Severity: critical<br>Area: Order history / data isolation<br>Environment: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a>, Chromium (Playwright Desktop Chrome), 1280x720</p>
+<h2>Steps to reproduce</h2>
+<ol>
+<li>Register a new customer and sign in.</li>
+<li>Open My account &gt; My invoices (the page calls <code>GET /invoices?page=1</code>).</li>
+</ol>
+<h2>Expected</h2>
+<p>Only the signed-in customer&#39;s own invoices are listed. A brand-new customer has none.</p>
+<h2>Actual</h2>
+<p>The response lists invoices belonging to other customers, with their billing addresses and totals.</p>
+<h2>Evidence</h2>
+<ul>
+<li>Failing test: <code>account.spec.ts</code> &gt; &quot;My invoices only returns the signed-in customer own invoices&quot; (other owners received: <code>[2, 3]</code>), in all 3 stability runs.</li>
+<li>Reproduced in the browser on 2026-10-26: brand-new customer id 5 received invoices owned by users 2 and 3. Earlier the same day, customer id 6 received invoices owned by users 2, 3, 16, 23 and 24.</li>
+</ul>
+
+
+</article>
+<article class="bug md" id="bug-BUG-02-profile-api-exposes-password-hash">
+<span class="badge major">major</span>
+<h1>BUG-02 Profile API sends the password hash to the browser</h1>
+<p>Severity: major<br>Area: Account / security<br>Environment: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a>, Chromium (Playwright Desktop Chrome), 1280x720</p>
+<h2>Steps to reproduce</h2>
+<ol>
+<li>Sign in as any customer.</li>
+<li>Open My profile. The page calls <code>GET /users/me</code>.</li>
+</ol>
+<h2>Expected</h2>
+<p>The response has no <code>password</code> field.</p>
+<h2>Actual</h2>
+<p>The response includes <code>password</code> with the stored hash.</p>
+<h2>Evidence</h2>
+<ul>
+<li>Failing test: <code>account.spec.ts</code> &gt; &quot;the profile data sent to the browser does not include the password hash&quot;, in all 3 stability runs.</li>
+<li>Reproduced in the browser on 2026-10-26 with a fresh customer: <code>/users/me</code> contains a <code>password</code> field. The value is not copied here.</li>
+</ul>
+
+
+</article>
+<article class="bug md" id="bug-BUG-03-quantity-plus-button-does-nothing">
+<span class="badge major">major</span>
+<h1>BUG-03 Product page &quot;+&quot; quantity button does nothing</h1>
+<p>Severity: major<br>Area: Product / add to cart<br>Environment: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a>, Chromium (Playwright Desktop Chrome), 1280x720</p>
+<h2>Steps to reproduce</h2>
+<ol>
+<li>Open <code>/#/product/5</code> (Slip Joint Pliers). The quantity shows 1.</li>
+<li>Click the &quot;+&quot; button next to the quantity.</li>
+</ol>
+<h2>Expected</h2>
+<p>The quantity becomes 2.</p>
+<h2>Actual</h2>
+<p>The quantity stays at 1.</p>
+<h2>Evidence</h2>
+<ul>
+<li>Failing test: <code>cart.spec.ts</code> &gt; &quot;the + button raises the quantity on the product page&quot; (expected &quot;2&quot;, received &quot;1&quot;), in all 3 stability runs.</li>
+<li>Reproduced in the browser on 2026-10-26: quantity after &quot;+&quot; = 1.</li>
+</ul>
+
+
+</article>
+<article class="bug md" id="bug-BUG-04-cart-line-total-zero">
+<span class="badge major">major</span>
+<h1>BUG-04 Cart line total always shows &quot;$00.00&quot;</h1>
+<p>Severity: major<br>Area: Cart<br>Environment: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a>, Chromium (Playwright Desktop Chrome), 1280x720</p>
+<h2>Steps to reproduce</h2>
+<ol>
+<li>Open Slip Joint Pliers ($9.17), set quantity 2, click Add to cart.</li>
+<li>Open the cart (<code>/#/checkout</code>).</li>
+</ol>
+<h2>Expected</h2>
+<p>The line total reads $18.34 (2 x $9.17).</p>
+<h2>Actual</h2>
+<p>The line total reads &quot;$00.00&quot;. The cart total is correct, so the two values disagree.</p>
+<h2>Evidence</h2>
+<ul>
+<li>Failing test: <code>cart.spec.ts</code> &gt; &quot;each cart line shows unit price times quantity&quot; (received &quot;$00.00&quot;), in all 3 stability runs.</li>
+<li>Reproduced in the browser on 2026-10-26: line price &quot;$00.00&quot;.</li>
+</ul>
+
+
+</article>
+<article class="bug md" id="bug-BUG-05-sort-options-reversed">
+<span class="badge major">major</span>
+<h1>BUG-05 Sort options sort in the opposite direction</h1>
+<p>Severity: major<br>Area: Catalogue / sort<br>Environment: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a>, Chromium (Playwright Desktop Chrome), 1280x720</p>
+<h2>Steps to reproduce</h2>
+<ol>
+<li>Open the catalogue.</li>
+<li>Choose &quot;Price (Low - High)&quot; in the sort list. Separately, choose &quot;Name (A - Z)&quot;.</li>
+</ol>
+<h2>Expected</h2>
+<p>Cheapest products first; names in A to Z order.</p>
+<h2>Actual</h2>
+<p>&quot;Price (Low - High)&quot; sends <code>sort=price,desc</code> and lists $125.23, $119.24, $100.79, $80.19 first. &quot;Name (A - Z)&quot; lists names in reverse order.</p>
+<h2>Evidence</h2>
+<ul>
+<li>Failing tests: <code>catalog.spec.ts</code> &gt; &quot;&quot;Price (Low - High)&quot; lists the cheapest products first&quot; and &quot;&quot;Name (A - Z)&quot; lists products alphabetically&quot;, in all 3 stability runs.</li>
+<li>Reproduced in the browser on 2026-10-26: request query <code>sort=price,desc&amp;between=price,1&amp;page=0</code>.</li>
+</ul>
+
+
+</article>
+<article class="bug md" id="bug-BUG-06-checkout-postcode-missing-value">
+<span class="badge major">major</span>
+<h1>BUG-06 Checkout address step fills the postcode with &quot;missing value&quot;</h1>
+<p>Severity: major<br>Area: Checkout<br>Environment: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a>, Chromium (Playwright Desktop Chrome), 1280x720</p>
+<h2>Steps to reproduce</h2>
+<ol>
+<li>Sign in as a customer whose profile postcode is 12345.</li>
+<li>Add any product to the cart, open the cart, Proceed, Proceed.</li>
+</ol>
+<h2>Expected</h2>
+<p>The address step&#39;s Postcode field is prefilled with 12345, like the other address fields.</p>
+<h2>Actual</h2>
+<p>The Postcode field contains the text &quot;missing value&quot;.</p>
+<h2>Evidence</h2>
+<ul>
+<li>Failing test: <code>checkout.spec.ts</code> &gt; &quot;address step prefills the postcode saved on the customer profile&quot; (received &quot;missing value&quot;), in all 3 stability runs.</li>
+<li>Reproduced in the browser on 2026-10-26.</li>
+</ul>
+
+
+</article>
+<article class="bug md" id="bug-BUG-07-profile-fields-mixed-up">
+<span class="badge major">major</span>
+<h1>BUG-07 Profile shows first and last name swapped and City &quot;City not found&quot;</h1>
+<p>Severity: major<br>Area: Account / profile<br>Environment: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a>, Chromium (Playwright Desktop Chrome), 1280x720</p>
+<h2>Steps to reproduce</h2>
+<ol>
+<li>Register as First name &quot;Qa&quot;, Last name &quot;Tester&quot;, City &quot;Testville&quot;, and sign in.</li>
+<li>Open My profile.</li>
+</ol>
+<h2>Expected</h2>
+<p>First Name &quot;Qa&quot;, Last Name &quot;Tester&quot;, City &quot;Testville&quot;.</p>
+<h2>Actual</h2>
+<p>First Name &quot;Tester&quot;, Last Name &quot;Qa&quot;, City &quot;City not found&quot;. <code>/users/me</code> returns the correct values, so the page maps them wrongly.</p>
+<h2>Evidence</h2>
+<ul>
+<li>Failing test: <code>account.spec.ts</code> &gt; &quot;the profile shows the customer own name and city&quot;, in all 3 stability runs.</li>
+<li>Reproduced in the browser on 2026-10-26: <code>first-name=Tester, last-name=Qa, city=City not found, postcode=12345</code>.</li>
+</ul>
+
+
+</article>
+<article class="bug md" id="bug-BUG-08-user-menu-user-data-not-found">
+<span class="badge minor">minor</span>
+<h1>BUG-08 Header user menu reads &quot;User Data not found&quot; for a signed-in customer</h1>
+<p>Severity: minor<br>Area: Account / header<br>Environment: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a>, Chromium (Playwright Desktop Chrome), 1280x720</p>
+<h2>Steps to reproduce</h2>
+<ol>
+<li>Sign in as any customer.</li>
+<li>Look at the user menu in the header.</li>
+</ol>
+<h2>Expected</h2>
+<p>The menu shows the customer&#39;s name (&quot;Qa Tester&quot;).</p>
+<h2>Actual</h2>
+<p>The menu label is &quot;User Data not found&quot;.</p>
+<h2>Evidence</h2>
+<ul>
+<li>Failing test: <code>account.spec.ts</code> &gt; &quot;the header user menu shows the customer name&quot; (received &quot; User Data not found &quot;), in all 3 stability runs.</li>
+<li>Reproduced in the browser on 2026-10-26 straight after sign-in.</li>
+</ul>
+
+
+</article>
+<article class="bug md" id="bug-BUG-09-success-shows-error-toast">
+<span class="badge minor">minor</span>
+<h1>BUG-09 Successful add to cart shows an error toast</h1>
+<p>Severity: minor<br>Area: Product<br>Environment: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a>, Chromium (Playwright Desktop Chrome), 1280x720</p>
+<h2>Steps to reproduce</h2>
+<ol>
+<li>Open Slip Joint Pliers and click Add to cart.</li>
+</ol>
+<h2>Expected</h2>
+<p>The cart badge updates and a success message appears.</p>
+<h2>Actual</h2>
+<p>The item is added (the cart badge updates), but the red toast says &quot;Oeps, something went wrong.&quot;</p>
+<h2>Evidence</h2>
+<ul>
+<li>Failing test: <code>cart.spec.ts</code> &gt; &quot;adding to the cart does not report an error&quot;, in all 3 stability runs.</li>
+<li>Reproduced in the browser on 2026-10-26: toast &quot;Oeps, something went wrong.&quot;, cart badge &quot;2&quot; after adding 2.</li>
+</ul>
+
+
+</article>
+<article class="bug md" id="bug-BUG-10-register-state-country-labels-swapped">
+<span class="badge minor">minor</span>
+<h1>BUG-10 Registration form: &quot;State&quot; and &quot;Country&quot; labels are swapped</h1>
+<p>Severity: minor<br>Area: Registration / accessibility<br>Environment: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a>, Chromium (Playwright Desktop Chrome), 1280x720</p>
+<h2>Steps to reproduce</h2>
+<ol>
+<li>Open <code>/#/auth/register</code>.</li>
+<li>Look at the State and Country fields.</li>
+</ol>
+<h2>Expected</h2>
+<p>&quot;Country&quot; labels the country drop-down and &quot;State&quot; labels the free-text state field.</p>
+<h2>Actual</h2>
+<p>The free-text field (placeholder &quot;Your state *&quot;) is labelled &quot;Country&quot;, and the country drop-down is labelled &quot;State&quot;. Screen-reader users and anyone going by the labels fill the wrong field.</p>
+<h2>Evidence</h2>
+<ul>
+<li>Failing test: <code>auth.spec.ts</code> &gt; &quot;the Country and State labels point at the right fields&quot; (no combobox named &quot;Country&quot;), in all 3 stability runs.</li>
+<li>Reproduced in the browser on 2026-10-26: <code>state(INPUT) label=&quot;Country&quot;</code>, <code>country(SELECT) label=&quot;State&quot;</code>.</li>
+</ul>
+
+
+</article>
+<article class="bug md" id="bug-BUG-11-categories-menu-broken-entries">
+<span class="badge major">major</span>
+<h1>BUG-11 Categories menu: &quot;UNDEFINED&quot; and broken entries</h1>
+<p>Severity: major<br>Area: Navigation<br>Environment: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a>, Chromium (Playwright Desktop Chrome), 1280x720</p>
+<h2>Steps to reproduce</h2>
+<ol>
+<li>Open the header Categories menu.</li>
+<li>Open each entry.</li>
+</ol>
+<h2>Expected</h2>
+<p>Every entry opens a category page that lists products.</p>
+<h2>Actual</h2>
+<p>The menu has an entry &quot;UNDEFINED&quot; (<code>#/category/undefined</code>) that opens a category with no products, and entries &quot;Chainsaws&quot; (<code>#/chainsaws</code>) and &quot;Rentals&quot; (<code>#/rentals</code>) that point outside the category routes.</p>
+<h2>Evidence</h2>
+<ul>
+<li>Failing test: <code>navigation.spec.ts</code> &gt; &quot;every Categories menu entry opens a category page with products&quot; (&quot;products in category&quot; received 0), in all 3 stability runs.</li>
+<li>Reproduced in the browser on 2026-10-26. Menu links: Hand Tools, Power Tools, UNDEFINED -&gt; #/category/undefined, Chainsaws -&gt; #/chainsaws, Rentals -&gt; #/rentals.</li>
+</ul>
+
+
+</article>
+<article class="bug md" id="bug-BUG-12-home-link-goes-to-contact">
+<span class="badge minor">minor</span>
+<h1>BUG-12 Header &quot;Home&quot; link opens the Contact page</h1>
+<p>Severity: minor<br>Area: Navigation<br>Environment: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a>, Chromium (Playwright Desktop Chrome), 1280x720</p>
+<h2>Steps to reproduce</h2>
+<ol>
+<li>Open any page and click &quot;Home&quot; in the header.</li>
+</ol>
+<h2>Expected</h2>
+<p>The catalogue (<code>#/</code>) opens.</p>
+<h2>Actual</h2>
+<p>The Contact page opens. The link&#39;s href is <code>#/contact</code>.</p>
+<h2>Evidence</h2>
+<ul>
+<li>Failing test: <code>navigation.spec.ts</code> &gt; &quot;the header Home link opens the catalogue&quot;, in all 3 stability runs.</li>
+<li>Reproduced in the browser on 2026-10-26: Home link href <code>#/contact</code>.</li>
+</ul>
+
+
+</article>
+<article class="bug md" id="bug-BUG-15-typos-in-labels">
+<span class="badge minor">minor</span>
+<h1>BUG-15 Typos in visible labels</h1>
+<p>Severity: minor<br>Area: Content (site-wide)<br>Environment: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a>, Chromium (Playwright Desktop Chrome), 1280x720</p>
+<p>Found while exploring, not by a test.</p>
+<h2>Steps to reproduce</h2>
+<ol>
+<li>Open the catalogue and look at the header menu, the sort heading and the search button.</li>
+</ol>
+<h2>Expected</h2>
+<p>&quot;Contact&quot;, &quot;Sort&quot;, &quot;Search&quot;.</p>
+<h2>Actual</h2>
+<p>&quot;Contakt&quot; (header menu), &quot;Sorth&quot; (sort heading), &quot;Serch&quot; (search button).</p>
+<h2>Evidence</h2>
+<p>Browser snapshot on 2026-10-26: <code>menuitem &quot;Contakt&quot;</code>, <code>heading &quot;Sorth&quot; [level=4]</code>, <code>button &quot;Serch&quot;</code>.</p>
+
+
+</article>
+<article class="bug md" id="bug-BUG-16-unnamed-controls-and-broken-image">
+<span class="badge minor">minor</span>
+<h1>BUG-16 Unnamed form controls and a broken image</h1>
+<p>Severity: minor<br>Area: Accessibility<br>Environment: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a>, Chromium (Playwright Desktop Chrome), 1280x720</p>
+<p>Found while exploring, not by a test.</p>
+<h2>Steps to reproduce</h2>
+<ol>
+<li>Open the catalogue and inspect it with a screen reader or the accessibility tree.</li>
+<li>Open a product page and look at the quantity buttons.</li>
+</ol>
+<h2>Expected</h2>
+<p>Every control has an accessible name and every image loads.</p>
+<h2>Actual</h2>
+<ul>
+<li>The search text box and the sort drop-down have no accessible name.</li>
+<li>The quantity &quot;-&quot; and &quot;+&quot; buttons on product pages have no text or aria-label.</li>
+<li>The header logo requests <code>/broken.png</code>, which returns 404.</li>
+</ul>
+<h2>Evidence</h2>
+<p>Browser on 2026-10-26: snapshot shows <code>textbox</code> and <code>combobox</code> with no name. The product page buttons <code>decrease-quantity</code> and <code>increase-quantity</code> have empty text and no aria-label. Network: <code>GET /broken.png =&gt; 404</code>.</p>
+
+
+</article>
+<article class="bug md" id="bug-BUG-17-order-placement-500-silent">
+<span class="badge critical">critical</span>
+<h1>BUG-17 Placing an order intermittently fails with HTTP 500, and the checkout shows nothing</h1>
+<p>Severity: critical<br>Area: Checkout / order placement<br>Environment: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a>, Chromium (Playwright Desktop Chrome), 1280x720</p>
+<h2>Steps to reproduce</h2>
+<ol>
+<li>Sign in as a customer and add Combination Pliers to the cart.</li>
+<li>Cart &gt; Proceed &gt; Proceed &gt; Postcode 12345 &gt; Proceed.</li>
+<li>Payment: Bank Transfer, account name &quot;Test Account&quot;, account number 123456789, then Confirm. &quot;Payment was successful&quot; appears.</li>
+<li>Click Confirm again to place the order.</li>
+</ol>
+<h2>Expected</h2>
+<p><code>POST /invoices</code> succeeds and the page says &quot;Thanks for your order! Your invoice number is INV-…&quot;. If the order can&#39;t be placed, the customer sees an error and can retry.</p>
+<h2>Actual</h2>
+<p>For periods of several minutes, <code>POST /invoices</code> returns <strong>500</strong> <code>{&quot;message&quot;:&quot;Something went wrong&quot;}</code> for every customer, including brand-new ones. The page shows no error: the Confirm button stays and nothing happens, so the customer cannot tell whether they have ordered.</p>
+<p>The request is identical to ones the server accepts (201) at other times: same customer, product, address and payment fields. The window comes and goes:</p>
+<ul>
+<li>Failed (500): every full-suite run today in which checkout reached the order step (7 of 7), the checkout spec run alone right after a full-suite run, and 2 manual orders at about 15:55 UTC.</li>
+<li>Succeeded (201): 10 manual orders between 15:46 and 16:00 UTC, and the checkout spec run alone at about 15:47 UTC.</li>
+<li>The shop&#39;s own invoice list shows no successful order from anyone between 15:47:48 and 15:58:40 (INV-2026000009 to INV-2026000010).</li>
+</ul>
+<p>Ruled out: the test session (the token is valid for 180 days and <code>/users/me</code> returns 200 during the failures), favourites on the account (a fresh account with a favourite ordered fine), and the number of earlier orders (a fresh account placed 4 orders in a row).</p>
+<p>The trigger isn&#39;t known. The failures cluster during and just after bursts of traffic (a full suite run with 2 browsers), so the order service may fail under modest load.</p>
+<h2>Evidence</h2>
+<ul>
+<li>Failing tests: <code>checkout.spec.ts</code> &gt; &quot;signed-in customer buys two items by bank transfer and gets an invoice number&quot; and &quot;a newly placed order appears in My invoices&quot;: timeout waiting for the confirmation, in all 3 stability runs.</li>
+<li>A temporary response log in a diagnostic run (removed afterwards) printed: <code>POST https://api-with-bugs.practicesoftwaretesting.com/invoices 500 {&quot;message&quot;:&quot;Something went wrong&quot;}</code>.</li>
+<li>Screenshot: <code>BUG-17-order-fails-after-favourite.png</code> (payment step after the failed Confirm: &quot;Payment was successful&quot;, no confirmation, no error).</li>
+</ul>
+
+
+</article>
+<article class="bug md" id="bug-BUG-18-intermittent-page-and-api-failures">
+<span class="badge major">major</span>
+<h1>BUG-18 Shop intermittently fails to load pages, scripts and product lists</h1>
+<p>Severity: major<br>Area: Site-wide availability<br>Environment: <a href="https://with-bugs.practicesoftwaretesting.com">https://with-bugs.practicesoftwaretesting.com</a>, Chromium (Playwright Desktop Chrome), 1280x720</p>
+<h2>Steps to reproduce</h2>
+<p>Not deterministic. Use the shop normally for a few minutes (for example, run the generated suite with 2 browsers) and watch the network panel.</p>
+<h2>Expected</h2>
+<p>Pages, their lazy-loaded scripts and the product API respond every time. If something fails, the page says so.</p>
+<h2>Actual</h2>
+<p>At random, one of these happens, and the page is left blank or half-rendered with no message:</p>
+<ul>
+<li>A lazy-loaded route script fails with <code>net::ERR_CONNECTION_RESET</code> (<code>chunk-RGBTLOVQ.js</code>, seen 2026-10-26 ~15:35 UTC). The router then stays on the current page, so clicking &quot;Sign in&quot; leaves the catalogue showing, and the failure persists until a full page reload. In the first suite run today, the account page after sign-in rendered with no content, even after a reload.</li>
+<li>Navigations fail with <code>net::ERR_TIMED_OUT</code> or <code>net::ERR_ABORTED</code>, or never reach the <code>load</code> event within 30 s.</li>
+<li>The catalogue renders its filters but the product list never appears.</li>
+</ul>
+<p>How often (9 full-suite runs today): 5 runs had 1 to 4 tests fail on one of these, and each of those tests passed again in a later run. In the 3-run stability check, run 1 had 4 such failures and runs 2 and 3 had none.</p>
+<p>Separately, between 16:00 and 16:04 UTC the shop dropped every account registered today (sign-in returned 401, new user ids restarted at 5). This looks like a scheduled data reset of the demo. It isn&#39;t counted as a bug, but a signed-in test that runs across a reset will fail.</p>
+<h2>Evidence</h2>
+<ul>
+<li>Tests that failed this way, then passed in later runs with no file changed: <code>cart.spec.ts</code> &gt; &quot;an out-of-stock product cannot be added to the cart&quot;; <code>catalog.spec.ts</code> &gt; &quot;searching &quot;pliers&quot; lists only pliers&quot;, &quot;searching a nonsense term reports no products&quot;, &quot;the Hammer category filter lists only hammers&quot; (all in stability run 1). Earlier runs: <code>auth.setup.ts</code> (blank account page), <code>mobile.spec.ts</code> &gt; &quot;@mobile the cart total is correct on a phone&quot; (<code>net::ERR_TIMED_OUT at …/#/product/5</code>), <code>cart.spec.ts</code> &gt; &quot;changing the cart quantity recalculates the cart total&quot;, <code>contact.spec.ts</code> &gt; &quot;a signed-in customer can send a contact message&quot;.</li>
+<li>Screenshot: <code>test-results/catalog-Catalogue-searching-pliers-lists-only-pliers-desktop/test-failed-1.png</code> (filters shown, no products).</li>
+<li>Browser console on 2026-10-26: <code>Failed to load resource: net::ERR_CONNECTION_RESET @ …/chunk-RGBTLOVQ.js</code> followed by <code>TypeError: Failed to fetch dynamically imported module</code>.</li>
+</ul>
+
+
+</article>
+</section>
+
+</div></main>
+<footer>Generated by the AutoQA Agent from the run's Markdown reports.</footer>
+<script>
+// Mark the tab for the section currently on screen: the last section whose top
+// has passed the tab bar, or the final section once the page is at its end.
+(() => {
+  const links = [...document.querySelectorAll('nav.tabs a')];
+  const sections = links.map((a) => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
+  const mark = (el) => links.forEach((a) => a.classList.toggle('active', a.getAttribute('href') === '#' + el.id));
+  const update = () => {
+    const atEnd = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+    const passed = sections.filter((el) => el.getBoundingClientRect().top <= 120);
+    mark(atEnd ? sections.at(-1) : (passed.at(-1) ?? sections[0]));
+  };
+  let queued = false;
+  window.addEventListener('scroll', () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => { queued = false; update(); });
+  }, { passive: true });
+  update();
+})();
+</script>
+</body>
+</html>
