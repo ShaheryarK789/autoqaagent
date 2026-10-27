@@ -1,0 +1,20 @@
+{
+  "note": "Tests in the Toolshop suite that are expected to fail, and why. CI is green when exactly these fail. A new failure, or one of these starting to pass, turns it red: something in the shop changed and a person should look. Entries marked intermittent may pass or fail, because their bug does not always show.",
+  "failures": [
+    { "test": "desktop > account.spec.ts > My invoices only returns the signed-in customer own invoices", "reason": "BUG-01" },
+    { "test": "desktop > account.spec.ts > the profile data sent to the browser does not include the password hash", "reason": "BUG-02" },
+    { "test": "desktop > cart.spec.ts > the + button raises the quantity on the product page", "reason": "BUG-03" },
+    { "test": "desktop > cart.spec.ts > each cart line shows unit price times quantity", "reason": "BUG-04" },
+    { "test": "desktop > catalog.spec.ts > \"Price (Low - High)\" lists the cheapest products first", "reason": "BUG-05" },
+    { "test": "desktop > catalog.spec.ts > \"Name (A - Z)\" lists products alphabetically", "reason": "BUG-05" },
+    { "test": "desktop > checkout.spec.ts > address step prefills the postcode saved on the customer profile", "reason": "BUG-06" },
+    { "test": "desktop > account.spec.ts > the profile shows the customer own name and city", "reason": "BUG-07" },
+    { "test": "desktop > account.spec.ts > the header user menu shows the customer name", "reason": "BUG-08" },
+    { "test": "desktop > cart.spec.ts > adding to the cart does not report an error", "reason": "BUG-09" },
+    { "test": "desktop > auth.spec.ts > the Country and State labels point at the right fields", "reason": "BUG-10" },
+    { "test": "desktop > navigation.spec.ts > every Categories menu entry opens a category page with products", "reason": "BUG-11" },
+    { "test": "desktop > navigation.spec.ts > the header Home link opens the catalogue", "reason": "BUG-12" },
+    { "test": "desktop > checkout.spec.ts > signed-in customer buys two items by bank transfer and gets an invoice number", "reason": "BUG-17: the shop's POST /invoices intermittently returns 500 (stability.md)", "intermittent": true },
+    { "test": "desktop > checkout.spec.ts > a newly placed order appears in My invoices", "reason": "BUG-17: the shop's POST /invoices intermittently returns 500 (stability.md)", "intermittent": true }
+  ]
+}

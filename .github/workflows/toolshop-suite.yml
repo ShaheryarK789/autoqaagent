@@ -1,0 +1,45 @@
+name: Toolshop suite
+
+# Replays the suite the agent wrote for Toolshop against the live shop, with no
+# AI involved. The suite proves real bugs, so some tests always fail: the job is
+# green when exactly the known failures happen, and red when anything changes.
+#
+# Off for now: it only runs when started by hand (Actions tab > Toolshop suite >
+# Run workflow). To run it every week, uncomment the schedule below.
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: '0 6 * * 1' # Mondays 06:00 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  suite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TARGET_URL: https://with-bugs.practicesoftwaretesting.com
+      WORKERS: 2 # a shared public shop: keep the traffic gentle
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Use the agent's Toolshop suite
+        run: cp -r examples/toolshop-2026-10-24/suite/. generated-tests/
+      - name: Run the suite
+        # Known bugs make some tests fail; the next step decides whether that is expected.
+        run: npx playwright test || true
+      - name: Compare with the expected failures
+        run: node bin/check-results.mjs examples/toolshop-2026-10-24/expected-failures.json
+      - name: Keep the HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
